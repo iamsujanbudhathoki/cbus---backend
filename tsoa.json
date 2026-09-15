@@ -1,0 +1,32 @@
+{
+  "entryFile": "src/server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": [
+    "src/controllers/**/*.controller.ts",
+    "src/controllers/*.controller.ts"
+  ],
+  "spec": {
+    "outputDirectory": "public",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "apiKey",
+        "name": "access_token",
+        "in": "cookie"
+      }
+    },
+    "spec": {
+      "servers": [
+        {
+          "url": "http://localhost:5000",
+          "description": "Development server"
+        }
+      ]
+    }
+  },
+  "routes": {
+    "routesDir": "src/routes",
+    "iocModule": "src/di/ioc.ts",
+    "authenticationModule": "src/middlewares/authentication.ts"
+  }
+}
