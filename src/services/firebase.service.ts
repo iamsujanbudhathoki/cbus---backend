@@ -29,19 +29,22 @@ export class FirebaseService {
   private initFirebase() {
     try {
       const admin = require('firebase-admin');
-      if (!admin.apps.length) {
-        const databaseURL = process.env.FIREBASE_DATABASE_URL;
+      const { getDatabase } = require('firebase-admin/database');
+      const apps = typeof admin.getApps === 'function' ? admin.getApps() : (admin.apps || []);
+      const databaseURL = process.env.FIREBASE_DATABASE_URL;
+
+      if (!apps.length) {
         if (databaseURL) {
-          admin.initializeApp({
+          const app = admin.initializeApp({
             databaseURL,
           });
-          this.db = admin.database();
+          this.db = getDatabase(app);
           console.log('[FirebaseService] Realtime Database initialized with URL:', databaseURL);
         } else {
           console.log('[FirebaseService] FIREBASE_DATABASE_URL not set. Operating with in-memory location fallback.');
         }
       } else {
-        this.db = admin.database();
+        this.db = getDatabase(apps[0]);
       }
     } catch (err) {
       console.warn('[FirebaseService] Firebase Admin SDK warning:', err);
