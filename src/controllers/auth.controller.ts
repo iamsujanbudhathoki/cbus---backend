@@ -21,9 +21,11 @@ export class AuthController extends Controller {
     try {
       const data = await this.authService.login(body);
       if (req && req.res) {
+        const isProduction = process.env.NODE_ENV === 'production' || process.env.BASE_URL?.includes('render.com');
         req.res.cookie(COOKIE_NAME, data.token, {
           httpOnly: true,
-          sameSite: 'lax',
+          sameSite: isProduction ? 'none' : 'lax',
+          secure: isProduction,
           path: '/',
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
@@ -46,7 +48,12 @@ export class AuthController extends Controller {
   @Post('/logout')
   async logout(@Request() req?: express.Request): Promise<ApiResponse> {
     if (req && req.res) {
-      req.res.clearCookie(COOKIE_NAME, { path: '/' });
+      const isProduction = process.env.NODE_ENV === 'production' || process.env.BASE_URL?.includes('render.com');
+      req.res.clearCookie(COOKIE_NAME, {
+        path: '/',
+        sameSite: isProduction ? 'none' : 'lax',
+        secure: isProduction,
+      });
     }
     return {
       success: true,
