@@ -8,6 +8,8 @@ import cookieParser from 'cookie-parser';
 import swaggerDocument from '../../public/swagger.json';
 import compression from 'compression';
 import { rateLimit } from 'express-rate-limit';
+import { AppDataSource } from '../config/database.config';
+
 export const configMiddleware = (app: express.Application) => {
   const allowedOrigins = [
     'http://localhost:3000',
@@ -61,6 +63,43 @@ export const configMiddleware = (app: express.Application) => {
   }
   app.use(express.static(DotenvConfig.MEDIA_UPLOAD_PATH!));
 
+  const healthCheckHandler = async (req: express.Request, res: express.Response) => {
+    const startTime = Date.now();
+    let dbStatus: 'connected' | 'disconnected' = 'disconnected';
+    let dbError: string | undefined;
+    let latencyMs: number | undefined;
+
+    try {
+      if (AppDataSource.isInitialized) {
+        await AppDataSource.query('SELECT 1');
+        dbStatus = 'connected';
+        latencyMs = Date.now() - startTime;
+      } else {
+        dbError = 'Data Source not initialized';
+      }
+    } catch (err: any) {
+      dbStatus = 'disconnected';
+      dbError = err.message || 'Database connection error';
+    }
+
+    const isHealthy = dbStatus === 'connected';
+    res.status(isHealthy ? 200 : 503).json({
+      status: isHealthy ? 'ok' : 'error',
+      message: isHealthy ? 'BusApp API service is healthy' : 'Database connection issue detected',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: {
+        status: dbStatus,
+        ...(latencyMs !== undefined && { latencyMs }),
+        ...(dbError && { error: dbError }),
+      },
+    });
+  };
+
+  app.get('/', healthCheckHandler);
+  app.get('/health', healthCheckHandler);
+
   RegisterRoutes(app);
   app.use(errorHandler);
 };
+

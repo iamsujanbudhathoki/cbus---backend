@@ -403,6 +403,58 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"HealthResponse": {
+				"properties": {
+					"status": {
+						"type": "string",
+						"enum": [
+							"ok",
+							"error"
+						]
+					},
+					"message": {
+						"type": "string"
+					},
+					"timestamp": {
+						"type": "string"
+					},
+					"uptime": {
+						"type": "number",
+						"format": "double"
+					},
+					"database": {
+						"properties": {
+							"error": {
+								"type": "string"
+							},
+							"latencyMs": {
+								"type": "number",
+								"format": "double"
+							},
+							"status": {
+								"type": "string",
+								"enum": [
+									"connected",
+									"disconnected"
+								]
+							}
+						},
+						"required": [
+							"status"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"status",
+					"message",
+					"timestamp",
+					"uptime",
+					"database"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CreateDriverDTO": {
 				"properties": {
 					"collegeId": {
@@ -712,7 +764,7 @@
 		}
 	},
 	"info": {
-		"title": "rest-nodejs-starter",
+		"title": "busapp-backend",
 		"version": "1.0.0",
 		"license": {
 			"name": "ISC"
@@ -1578,6 +1630,28 @@
 						}
 					}
 				}
+			}
+		},
+		"/health": {
+			"get": {
+				"operationId": "GetHealth",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HealthResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Health"
+				],
+				"security": [],
+				"parameters": []
 			}
 		},
 		"/api/v1/drivers": {
