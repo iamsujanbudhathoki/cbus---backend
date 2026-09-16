@@ -33,18 +33,13 @@ class Server {
 
   async migrateLegacyRoles() {
     try {
-      const useSSL = DotenvConfig.DB_SSL || (!!DotenvConfig.DATABASE_URL && DotenvConfig.DATABASE_URL.includes('supabase'));
-      const clientConfig = DotenvConfig.DATABASE_URL
-        ? { connectionString: DotenvConfig.DATABASE_URL, ssl: useSSL ? { rejectUnauthorized: false } : false }
-        : {
-          host: DotenvConfig.DB_HOST,
-          port: +DotenvConfig.DB_PORT,
-          user: DotenvConfig.DB_USERNAME,
-          password: DotenvConfig.DB_PASSWORD,
-          database: DotenvConfig.DB_NAME,
-          ssl: useSSL ? { rejectUnauthorized: false } : false,
-        };
-      const client = new Client(clientConfig);
+      const dbUrl = DotenvConfig.DATABASE_URL;
+      if (!dbUrl) return;
+      const useSSL = dbUrl.includes('supabase') || dbUrl.includes('pooler');
+      const client = new Client({
+        connectionString: dbUrl,
+        ssl: useSSL ? { rejectUnauthorized: false } : false,
+      });
       await client.connect();
       await client.query("UPDATE users SET role = 'ADMIN' WHERE role::text = 'SUPER_ADMIN'");
       await client.end();

@@ -16,13 +16,7 @@ class DotenvConfig {
 
   // DB
   static DATABASE_URL = process.env.DATABASE_URL;
-  static DB_TYPE = process.env.DB_TYPE || 'postgres';
-  static DB_HOST = process.env.DB_HOST || 'localhost';
-  static DB_PORT = process.env.DB_PORT || 5432;
-  static DB_USERNAME = process.env.DB_USERNAME || 'postgres';
-  static DB_PASSWORD = process.env.DB_PASSWORD || 'postgres';
-  static DB_NAME = process.env.DB_NAME || 'busapp';
-  static DB_SSL = process.env.DB_SSL === 'true';
+
 
   // MAIL
   static MAIL_HOST = process.env.MAIL_HOST;
