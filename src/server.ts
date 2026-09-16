@@ -1,6 +1,5 @@
 import express from 'express';
 import 'reflect-metadata';
-import { Client } from 'pg';
 import { AppDataSource } from './config/database.config';
 import { DotenvConfig } from './config/env.config';
 import { configMiddleware } from './middlewares';
@@ -15,7 +14,6 @@ class Server {
   // bootstrap
   async bootstrap() {
     await this.initializePath();
-    await this.migrateLegacyRoles();
     AppDataSource.initialize()
       .then(() => {
         console.log('Data Source has been initialized!');
@@ -29,23 +27,6 @@ class Server {
       .catch((err) => {
         console.error('Error during Data Source initialization', err);
       });
-  }
-
-  async migrateLegacyRoles() {
-    try {
-      const dbUrl = DotenvConfig.DATABASE_URL;
-      if (!dbUrl) return;
-      const useSSL = dbUrl.includes('supabase') || dbUrl.includes('pooler');
-      const client = new Client({
-        connectionString: dbUrl,
-        ssl: useSSL ? { rejectUnauthorized: false } : false,
-      });
-      await client.connect();
-      await client.query("UPDATE users SET role = 'ADMIN' WHERE role::text = 'SUPER_ADMIN'");
-      await client.end();
-    } catch {
-      // Ignore if table or database does not exist yet prior to initial sync
-    }
   }
 
   async initializePath() {
