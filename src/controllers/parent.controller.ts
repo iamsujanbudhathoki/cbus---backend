@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { CreateParentDTO, LinkStudentDTO, ParentService, UpdateParentDTO } from '../services/parent.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/parents')
 @Tags('Parents')
@@ -27,6 +28,7 @@ export class ParentController extends Controller {
    * @Response<ApiResponse>(200, "Parents list fetched successfully.")
    */
   @Get('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async getAll(
     @Request() req: express.Request,
     @Query() collegeId?: string
@@ -102,6 +104,7 @@ export class ParentController extends Controller {
    * @Response<ApiResponse>(400, "Creation error.")
    */
   @Post('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async create(
     @Body() body: CreateParentDTO,
     @Request() req: express.Request
@@ -128,6 +131,7 @@ export class ParentController extends Controller {
    * @Response<ApiResponse>(200, "Parent profile updated.")
    */
   @Put('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async update(
     @Path() id: string,
     @Body() body: UpdateParentDTO,
@@ -153,6 +157,7 @@ export class ParentController extends Controller {
    * @Response<ApiResponse>(200, "Parent profile deleted.")
    */
   @Delete('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async delete(
     @Path() id: string,
     @Request() req: express.Request
@@ -185,6 +190,7 @@ export class ParentController extends Controller {
    * @Response<ApiResponse>(400, "Linking failed or record not found.")
    */
   @Post('/link-student')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE, UserRole.PARENT])
   async linkStudent(@Body() body: LinkStudentDTO): Promise<ApiResponse> {
     try {
       const data = await this.parentService.linkStudent(body);

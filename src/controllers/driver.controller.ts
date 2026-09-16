@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { CreateDriverDTO, DriverService, UpdateDriverDTO } from '../services/driver.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/drivers')
 @Tags('Drivers')
@@ -88,6 +89,7 @@ export class DriverController extends Controller {
    * @Response<ApiResponse>(400, "Validation error or duplicate driver license.")
    */
   @Post('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async create(
     @Body() body: CreateDriverDTO,
     @Request() req: express.Request
@@ -118,6 +120,7 @@ export class DriverController extends Controller {
    * @Response<ApiResponse>(400, "Update validation error.")
    */
   @Put('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async update(
     @Path() id: string,
     @Body() body: UpdateDriverDTO,
@@ -147,6 +150,7 @@ export class DriverController extends Controller {
    * @Response<ApiResponse>(400, "Deactivation failed.")
    */
   @Delete('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async delete(
     @Path() id: string,
     @Request() req: express.Request

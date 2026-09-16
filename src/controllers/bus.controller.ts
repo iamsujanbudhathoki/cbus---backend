@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { AssignBusRouteDTO, BusService, CreateBusDTO, UpdateBusDTO } from '../services/bus.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/buses')
 @Tags('Buses')
@@ -105,6 +106,7 @@ export class BusController extends Controller {
    * @Response<ApiResponse>(400, "Validation error or duplicate bus number.")
    */
   @Post('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async create(
     @Body() body: CreateBusDTO,
     @Request() req: express.Request
@@ -142,6 +144,7 @@ export class BusController extends Controller {
    * @Response<ApiResponse>(404, "Bus not found.")
    */
   @Put('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async update(
     @Path() id: string,
     @Body() body: UpdateBusDTO,
@@ -177,6 +180,7 @@ export class BusController extends Controller {
    * @Response<ApiResponse>(400, "Deactivation failure.")
    */
   @Delete('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async delete(
     @Path() id: string,
     @Request() req: express.Request
@@ -216,6 +220,7 @@ export class BusController extends Controller {
    * @Response<ApiResponse>(400, "Invalid route/bus combination or tenant mismatch.")
    */
   @Post('/assign-route')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async assignRoute(
     @Body() body: AssignBusRouteDTO,
     @Request() req: express.Request

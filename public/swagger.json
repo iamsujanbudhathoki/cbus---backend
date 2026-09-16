@@ -793,7 +793,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"DRIVER",
+							"ADMIN"
+						]
 					}
 				],
 				"parameters": [],
@@ -869,7 +872,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -906,7 +912,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -941,7 +950,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1015,7 +1027,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1062,7 +1077,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1099,7 +1117,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1138,7 +1159,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1212,7 +1236,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1286,7 +1313,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1333,7 +1363,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1370,7 +1403,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1409,7 +1445,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1446,7 +1485,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1481,7 +1523,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1555,7 +1600,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1602,7 +1650,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1676,7 +1727,11 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE",
+							"PARENT"
+						]
 					}
 				],
 				"parameters": [],
@@ -1773,7 +1828,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -1847,7 +1905,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1894,7 +1955,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -1931,7 +1995,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"DRIVER",
+							"ADMIN"
+						]
 					}
 				],
 				"parameters": []
@@ -1958,7 +2025,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"DRIVER",
+							"ADMIN"
+						]
 					}
 				],
 				"parameters": [],
@@ -1997,7 +2067,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"DRIVER",
+							"ADMIN"
+						]
 					}
 				],
 				"parameters": [
@@ -2046,7 +2119,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"DRIVER",
+							"ADMIN"
+						]
 					}
 				],
 				"parameters": [
@@ -2083,7 +2159,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"DRIVER",
+							"ADMIN"
+						]
 					}
 				],
 				"parameters": [
@@ -2120,7 +2199,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -2456,7 +2538,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],
@@ -2530,7 +2615,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -2577,7 +2665,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [
@@ -2614,7 +2705,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"ADMIN",
+							"COLLEGE"
+						]
 					}
 				],
 				"parameters": [],

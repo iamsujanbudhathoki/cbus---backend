@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { CollegeService, CreateCollegeDTO, UpdateCollegeDTO } from '../services/college.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/colleges')
 @Tags('Colleges')
@@ -45,7 +46,7 @@ export class CollegeController extends Controller {
    * @Response<ApiResponse>(403, "Forbidden - Super Admin permission required.")
    */
   @Get('/platform-metrics')
-  @Security('jwt', ['ADMIN'])
+  @Security('jwt', [UserRole.ADMIN])
   async getPlatformMetrics(): Promise<ApiResponse> {
     const data = await this.collegeService.getPlatformMetrics();
     return { success: true, message: 'Platform metrics fetched successfully', data };
@@ -120,7 +121,7 @@ export class CollegeController extends Controller {
    * @Response<ApiResponse>(403, "Forbidden - Super Admin permission required.")
    */
   @Post('')
-  @Security('jwt', ['ADMIN'])
+  @Security('jwt', [UserRole.ADMIN])
   async create(@Body() body: CreateCollegeDTO): Promise<ApiResponse> {
     try {
       const data = await this.collegeService.createCollege(body);
@@ -149,7 +150,7 @@ export class CollegeController extends Controller {
    * @Response<ApiResponse>(400, "Update validation failure.")
    */
   @Put('/{id}')
-  @Security('jwt', ['ADMIN'])
+  @Security('jwt', [UserRole.ADMIN])
   async update(@Path() id: string, @Body() body: UpdateCollegeDTO): Promise<ApiResponse> {
     try {
       const data = await this.collegeService.updateCollege(id, body);
@@ -177,7 +178,7 @@ export class CollegeController extends Controller {
    * @Response<ApiResponse>(400, "Deactivation failure.")
    */
   @Delete('/{id}')
-  @Security('jwt', ['ADMIN'])
+  @Security('jwt', [UserRole.ADMIN])
   async delete(@Path() id: string): Promise<ApiResponse> {
     try {
       await this.collegeService.deleteCollege(id);

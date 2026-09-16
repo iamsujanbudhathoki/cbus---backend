@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { AddRouteStopDTO, CreateRouteDTO, RouteService, UpdateRouteDTO } from '../services/route.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/routes')
 @Tags('Routes')
@@ -77,6 +78,7 @@ export class RouteController extends Controller {
    * @Response<ApiResponse>(400, "Creation error.")
    */
   @Post('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async create(
     @Body() body: CreateRouteDTO,
     @Request() req: express.Request
@@ -103,6 +105,7 @@ export class RouteController extends Controller {
    * @Response<ApiResponse>(200, "Route updated.")
    */
   @Put('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async update(
     @Path() id: string,
     @Body() body: UpdateRouteDTO,
@@ -128,6 +131,7 @@ export class RouteController extends Controller {
    * @Response<ApiResponse>(200, "Route deactivated.")
    */
   @Delete('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async delete(
     @Path() id: string,
     @Request() req: express.Request
@@ -161,6 +165,7 @@ export class RouteController extends Controller {
    * @Response<ApiResponse>(400, "Failed to add route stop.")
    */
   @Post('/stops')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async addStop(
     @Body() body: AddRouteStopDTO,
     @Request() req: express.Request
@@ -185,6 +190,7 @@ export class RouteController extends Controller {
    * @Response<ApiResponse>(200, "Route stop removed successfully.")
    */
   @Delete('/stops/{stopId}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async deleteStop(
     @Path() stopId: string,
     @Request() req: express.Request

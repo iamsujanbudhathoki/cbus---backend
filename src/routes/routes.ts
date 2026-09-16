@@ -388,7 +388,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"ref":"LocationUpdateDTO"},
         };
         app.post('/api/v1/tracking/update-location',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["DRIVER","ADMIN"]}]),
             ...(fetchMiddlewares<RequestHandler>(TrackingController)),
             ...(fetchMiddlewares<RequestHandler>(TrackingController.prototype.updateLocation)),
 
@@ -461,7 +461,7 @@ export function RegisterRoutes(app: Router) {
                 collegeId: {"in":"query","name":"collegeId","dataType":"string"},
         };
         app.get('/api/v1/tracking/fleet',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(TrackingController)),
             ...(fetchMiddlewares<RequestHandler>(TrackingController.prototype.getCollegeFleetTracking)),
 
@@ -498,7 +498,7 @@ export function RegisterRoutes(app: Router) {
                 collegeId: {"in":"query","name":"collegeId","dataType":"string"},
         };
         app.get('/api/v1/students',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(StudentController)),
             ...(fetchMiddlewares<RequestHandler>(StudentController.prototype.getAll)),
 
@@ -572,7 +572,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/students',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(StudentController)),
             ...(fetchMiddlewares<RequestHandler>(StudentController.prototype.create)),
 
@@ -610,7 +610,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.put('/api/v1/students/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(StudentController)),
             ...(fetchMiddlewares<RequestHandler>(StudentController.prototype.update)),
 
@@ -647,7 +647,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.delete('/api/v1/students/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(StudentController)),
             ...(fetchMiddlewares<RequestHandler>(StudentController.prototype.delete)),
 
@@ -684,7 +684,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/students/assign-bus',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(StudentController)),
             ...(fetchMiddlewares<RequestHandler>(StudentController.prototype.assignBus)),
 
@@ -721,7 +721,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/students/assign-stop',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(StudentController)),
             ...(fetchMiddlewares<RequestHandler>(StudentController.prototype.assignStop)),
 
@@ -832,7 +832,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/routes',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(RouteController)),
             ...(fetchMiddlewares<RequestHandler>(RouteController.prototype.create)),
 
@@ -870,7 +870,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.put('/api/v1/routes/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(RouteController)),
             ...(fetchMiddlewares<RequestHandler>(RouteController.prototype.update)),
 
@@ -907,7 +907,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.delete('/api/v1/routes/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(RouteController)),
             ...(fetchMiddlewares<RequestHandler>(RouteController.prototype.delete)),
 
@@ -944,7 +944,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/routes/stops',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(RouteController)),
             ...(fetchMiddlewares<RequestHandler>(RouteController.prototype.addStop)),
 
@@ -981,7 +981,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.delete('/api/v1/routes/stops/:stopId',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(RouteController)),
             ...(fetchMiddlewares<RequestHandler>(RouteController.prototype.deleteStop)),
 
@@ -1018,7 +1018,7 @@ export function RegisterRoutes(app: Router) {
                 collegeId: {"in":"query","name":"collegeId","dataType":"string"},
         };
         app.get('/api/v1/parents',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(ParentController)),
             ...(fetchMiddlewares<RequestHandler>(ParentController.prototype.getAll)),
 
@@ -1128,7 +1128,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/parents',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(ParentController)),
             ...(fetchMiddlewares<RequestHandler>(ParentController.prototype.create)),
 
@@ -1166,7 +1166,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.put('/api/v1/parents/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(ParentController)),
             ...(fetchMiddlewares<RequestHandler>(ParentController.prototype.update)),
 
@@ -1203,7 +1203,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.delete('/api/v1/parents/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(ParentController)),
             ...(fetchMiddlewares<RequestHandler>(ParentController.prototype.delete)),
 
@@ -1239,7 +1239,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"ref":"LinkStudentDTO"},
         };
         app.post('/api/v1/parents/link-student',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE","PARENT"]}]),
             ...(fetchMiddlewares<RequestHandler>(ParentController)),
             ...(fetchMiddlewares<RequestHandler>(ParentController.prototype.linkStudent)),
 
@@ -1384,7 +1384,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/drivers',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverController)),
             ...(fetchMiddlewares<RequestHandler>(DriverController.prototype.create)),
 
@@ -1422,7 +1422,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.put('/api/v1/drivers/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverController)),
             ...(fetchMiddlewares<RequestHandler>(DriverController.prototype.update)),
 
@@ -1459,7 +1459,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.delete('/api/v1/drivers/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverController)),
             ...(fetchMiddlewares<RequestHandler>(DriverController.prototype.delete)),
 
@@ -1495,7 +1495,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.get('/api/v1/driver-shifts/portal',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["DRIVER","ADMIN"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController)),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController.prototype.getPortal)),
 
@@ -1532,7 +1532,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","ref":"StartShiftDTO"},
         };
         app.post('/api/v1/driver-shifts/start',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["DRIVER","ADMIN"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController)),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController.prototype.startShift)),
 
@@ -1570,7 +1570,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"ref":"UpdateNotesDTO"},
         };
         app.put('/api/v1/driver-shifts/:id/notes',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["DRIVER","ADMIN"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController)),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController.prototype.updateNotes)),
 
@@ -1607,7 +1607,7 @@ export function RegisterRoutes(app: Router) {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
         };
         app.post('/api/v1/driver-shifts/:id/end',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["DRIVER","ADMIN"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController)),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController.prototype.endShift)),
 
@@ -1644,7 +1644,7 @@ export function RegisterRoutes(app: Router) {
                 range: {"in":"query","name":"range","dataType":"string"},
         };
         app.get('/api/v1/driver-shifts/history',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["DRIVER","ADMIN"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController)),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController.prototype.getHistory)),
 
@@ -1682,7 +1682,7 @@ export function RegisterRoutes(app: Router) {
                 driverId: {"in":"query","name":"driverId","dataType":"string"},
         };
         app.get('/api/v1/driver-shifts/admin',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController)),
             ...(fetchMiddlewares<RequestHandler>(DriverShiftController.prototype.getAdminShifts)),
 
@@ -2045,7 +2045,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/buses',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(BusController)),
             ...(fetchMiddlewares<RequestHandler>(BusController.prototype.create)),
 
@@ -2083,7 +2083,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.put('/api/v1/buses/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(BusController)),
             ...(fetchMiddlewares<RequestHandler>(BusController.prototype.update)),
 
@@ -2120,7 +2120,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.delete('/api/v1/buses/:id',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(BusController)),
             ...(fetchMiddlewares<RequestHandler>(BusController.prototype.delete)),
 
@@ -2157,7 +2157,7 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.post('/api/v1/buses/assign-route',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["ADMIN","COLLEGE"]}]),
             ...(fetchMiddlewares<RequestHandler>(BusController)),
             ...(fetchMiddlewares<RequestHandler>(BusController.prototype.assignRoute)),
 

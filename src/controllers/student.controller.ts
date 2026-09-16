@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { AssignStudentBusDTO, AssignStudentStopDTO, CreateStudentDTO, StudentService, UpdateStudentDTO } from '../services/student.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/students')
 @Tags('Students')
@@ -27,6 +28,7 @@ export class StudentController extends Controller {
    * @Response<ApiResponse>(200, "Students list retrieved successfully.")
    */
   @Get('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async getAll(
     @Request() req: express.Request,
     @Query() collegeId?: string
@@ -76,6 +78,7 @@ export class StudentController extends Controller {
    * @Response<ApiResponse>(400, "Creation error.")
    */
   @Post('')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async create(
     @Body() body: CreateStudentDTO,
     @Request() req: express.Request
@@ -102,6 +105,7 @@ export class StudentController extends Controller {
    * @Response<ApiResponse>(200, "Student profile updated.")
    */
   @Put('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async update(
     @Path() id: string,
     @Body() body: UpdateStudentDTO,
@@ -127,6 +131,7 @@ export class StudentController extends Controller {
    * @Response<ApiResponse>(200, "Student deactivated.")
    */
   @Delete('/{id}')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async delete(
     @Path() id: string,
     @Request() req: express.Request
@@ -152,6 +157,7 @@ export class StudentController extends Controller {
    * @Response<ApiResponse>(200, "Student assigned to bus.")
    */
   @Post('/assign-bus')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async assignBus(
     @Body() body: AssignStudentBusDTO,
     @Request() req: express.Request
@@ -178,6 +184,7 @@ export class StudentController extends Controller {
    * @Response<ApiResponse>(200, "Student assigned to route stop.")
    */
   @Post('/assign-stop')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async assignStop(
     @Body() body: AssignStudentStopDTO,
     @Request() req: express.Request

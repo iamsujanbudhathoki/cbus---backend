@@ -5,6 +5,7 @@ import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { DriverShiftService, StartShiftDTO, UpdateNotesDTO } from '../services/driver-shift.service';
 import { AppError } from '../utils/appError.util';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/driver-shifts')
 @Tags('Driver Shifts')
@@ -36,6 +37,7 @@ export class DriverShiftController extends Controller {
    * @Response<ApiResponse>(401, "Unauthorized - Invalid driver session.")
    */
   @Get('/portal')
+  @Security('jwt', [UserRole.DRIVER, UserRole.ADMIN])
   async getPortal(@Request() req: express.Request): Promise<ApiResponse> {
     try {
       const userId = this.getUserId(req);
@@ -68,6 +70,7 @@ export class DriverShiftController extends Controller {
    * @Response<ApiResponse>(400, "Driver already has an active ongoing shift.")
    */
   @Post('/start')
+  @Security('jwt', [UserRole.DRIVER, UserRole.ADMIN])
   async startShift(
     @Request() req: express.Request,
     @Body() body?: StartShiftDTO
@@ -96,6 +99,7 @@ export class DriverShiftController extends Controller {
    * @Response<ApiResponse>(200, "Shift notes updated successfully.")
    */
   @Put('/{id}/notes')
+  @Security('jwt', [UserRole.DRIVER, UserRole.ADMIN])
   async updateNotes(
     @Request() req: express.Request,
     @Path() id: string,
@@ -129,6 +133,7 @@ export class DriverShiftController extends Controller {
    * @Response<ApiResponse>(400, "Shift already ended or not found.")
    */
   @Post('/{id}/end')
+  @Security('jwt', [UserRole.DRIVER, UserRole.ADMIN])
   async endShift(
     @Request() req: express.Request,
     @Path() id: string
@@ -156,6 +161,7 @@ export class DriverShiftController extends Controller {
    * @Response<ApiResponse>(200, "Shift history fetched successfully.")
    */
   @Get('/history')
+  @Security('jwt', [UserRole.DRIVER, UserRole.ADMIN])
   async getHistory(
     @Request() req: express.Request,
     @Query() range?: string
@@ -188,6 +194,7 @@ export class DriverShiftController extends Controller {
    * @Response<ApiResponse>(200, "Admin driver shifts retrieved successfully.")
    */
   @Get('/admin')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async getAdminShifts(
     @Request() req: express.Request,
     @Query() collegeId?: string,

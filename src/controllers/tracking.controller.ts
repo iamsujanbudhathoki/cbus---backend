@@ -4,6 +4,7 @@ import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
 import { LocationUpdateDTO, TrackingService } from '../services/tracking.service';
 import { resolveTenantCollegeId } from '../middlewares/auth.middleware';
+import { UserRole } from '../types/enums';
 
 @Route('api/v1/tracking')
 @Tags('Live Bus Tracking')
@@ -38,6 +39,7 @@ export class TrackingController extends Controller {
    * @Response<ApiResponse>(400, "Invalid coordinates or missing bus ID.")
    */
   @Post('/update-location')
+  @Security('jwt', [UserRole.DRIVER, UserRole.ADMIN])
   async updateLocation(@Body() body: LocationUpdateDTO): Promise<ApiResponse> {
     try {
       const data = await this.trackingService.updateLocation(body);
@@ -85,6 +87,7 @@ export class TrackingController extends Controller {
    * @Response<ApiResponse>(200, "Fleet tracking data fetched successfully.")
    */
   @Get('/fleet')
+  @Security('jwt', [UserRole.ADMIN, UserRole.COLLEGE])
   async getCollegeFleetTracking(
     @Request() req: express.Request,
     @Query() collegeId?: string
