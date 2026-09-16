@@ -37,13 +37,13 @@ class Server {
       const clientConfig = DotenvConfig.DATABASE_URL
         ? { connectionString: DotenvConfig.DATABASE_URL, ssl: useSSL ? { rejectUnauthorized: false } : false }
         : {
-            host: DotenvConfig.DB_HOST,
-            port: +DotenvConfig.DB_PORT,
-            user: DotenvConfig.DB_USERNAME,
-            password: DotenvConfig.DB_PASSWORD,
-            database: DotenvConfig.DB_NAME,
-            ssl: useSSL ? { rejectUnauthorized: false } : false,
-          };
+          host: DotenvConfig.DB_HOST,
+          port: +DotenvConfig.DB_PORT,
+          user: DotenvConfig.DB_USERNAME,
+          password: DotenvConfig.DB_PASSWORD,
+          database: DotenvConfig.DB_NAME,
+          ssl: useSSL ? { rejectUnauthorized: false } : false,
+        };
       const client = new Client(clientConfig);
       await client.connect();
       await client.query("UPDATE users SET role = 'ADMIN' WHERE role::text = 'SUPER_ADMIN'");
