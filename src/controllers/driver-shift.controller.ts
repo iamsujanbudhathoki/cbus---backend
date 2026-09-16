@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Path, Post, Put, Query, Request, Route, Security, Tags } from 'tsoa';
+import { Body, Controller, Get, Path, Post, Put, Query, Request, Response, Route, Security, Tags } from 'tsoa';
 import { injectable } from 'tsyringe';
 import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
@@ -22,6 +22,19 @@ export class DriverShiftController extends Controller {
     return req.user.id;
   }
 
+  /**
+   * Fetch active driver portal dashboard state.
+   *
+   * ### Intent & Business Purpose
+   * Retrieves active shift details, assigned bus info, assigned route stops, and current active shift status for the authenticated driver.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** `DRIVER`.
+   * - **Access Control:** Requires active driver session JWT.
+   *
+   * @Response<ApiResponse>(200, "Driver portal data retrieved successfully.")
+   * @Response<ApiResponse>(401, "Unauthorized - Invalid driver session.")
+   */
   @Get('/portal')
   async getPortal(@Request() req: express.Request): Promise<ApiResponse> {
     try {
@@ -34,6 +47,26 @@ export class DriverShiftController extends Controller {
     }
   }
 
+  /**
+   * Start a new driving shift & initiate live GPS tracking.
+   *
+   * ### Intent & Business Purpose
+   * Initiates an active bus shift for the authenticated driver. Marks the bus as active on live tracking maps and initializes Firebase Realtime DB tracking node.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** `DRIVER`.
+   *
+   * ### Side Effects
+   * - Inserts active shift into `driver_shifts` table with status `ONGOING` / `STARTED`.
+   * - Initializes live tracking node in Firebase Realtime Database.
+   *
+   * ### Edge Cases & QA Testing Focus
+   * - Attempting to start a shift while another shift is currently active returns HTTP 400.
+   *
+   * @param body Optional start shift parameters (overriding bus/route if applicable).
+   * @Response<ApiResponse>(200, "Shift started successfully.")
+   * @Response<ApiResponse>(400, "Driver already has an active ongoing shift.")
+   */
   @Post('/start')
   async startShift(
     @Request() req: express.Request,
@@ -49,6 +82,19 @@ export class DriverShiftController extends Controller {
     }
   }
 
+  /**
+   * Update notes or remarks for an ongoing or completed shift.
+   *
+   * ### Intent & Business Purpose
+   * Allows drivers to append operational notes (e.g. traffic delays, route detours, fuel stops, incidents).
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Driver shift UUID.
+   *
+   * @param id Driver shift UUID.
+   * @param body Payload containing `notes` text.
+   * @Response<ApiResponse>(200, "Shift notes updated successfully.")
+   */
   @Put('/{id}/notes')
   async updateNotes(
     @Request() req: express.Request,
@@ -65,6 +111,23 @@ export class DriverShiftController extends Controller {
     }
   }
 
+  /**
+   * Complete & end an active driving shift.
+   *
+   * ### Intent & Business Purpose
+   * Ends an active driver shift, records end timestamp, calculates total shift duration, and sets tracking status to completed.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Shift UUID.
+   *
+   * ### Side Effects
+   * - Updates shift record status to `COMPLETED` and sets `endedAt` timestamp.
+   * - Clears / updates active tracking node in Firebase Realtime DB.
+   *
+   * @param id Shift UUID.
+   * @Response<ApiResponse>(200, "Shift completed successfully.")
+   * @Response<ApiResponse>(400, "Shift already ended or not found.")
+   */
   @Post('/{id}/end')
   async endShift(
     @Request() req: express.Request,
@@ -80,6 +143,18 @@ export class DriverShiftController extends Controller {
     }
   }
 
+  /**
+   * Get driver's historical shift logs.
+   *
+   * ### Intent & Business Purpose
+   * Retrieves past shift logs for the authenticated driver filtered by date range (e.g. `today`, `week`, `month`, `all`).
+   *
+   * ### Query Parameters
+   * - `range` *(optional string)*: Date range filter (`today`, `week`, `month`, `all`).
+   *
+   * @param range Optional date range filter.
+   * @Response<ApiResponse>(200, "Shift history fetched successfully.")
+   */
   @Get('/history')
   async getHistory(
     @Request() req: express.Request,
@@ -95,6 +170,23 @@ export class DriverShiftController extends Controller {
     }
   }
 
+  /**
+   * Administrative view of driver shifts across college campus.
+   *
+   * ### Intent & Business Purpose
+   * Allows college admins to inspect active and past driver shifts across the fleet, filter by driver ID, and audit shift completion.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.
+   *
+   * ### Query Parameters
+   * - `collegeId` *(optional string)*: Filter by target college UUID.
+   * - `driverId` *(optional string)*: Filter by specific driver UUID.
+   *
+   * @param collegeId Optional college UUID filter.
+   * @param driverId Optional driver UUID filter.
+   * @Response<ApiResponse>(200, "Admin driver shifts retrieved successfully.")
+   */
   @Get('/admin')
   async getAdminShifts(
     @Request() req: express.Request,

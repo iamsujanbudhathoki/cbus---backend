@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request, Route, Security, Tags } from 'tsoa';
+import { Body, Controller, Get, Post, Request, Response, Route, Security, Tags } from 'tsoa';
 import { injectable } from 'tsyringe';
 import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
@@ -13,6 +13,34 @@ export class AuthController extends Controller {
     super();
   }
 
+  /**
+   * User authentication & HTTP-only cookie issuance.
+   *
+   * ### Intent & Business Purpose
+   * Authenticates user credentials (email and password), validates user account status, and issues a JWT token set as a secure HTTP-only cookie (`access_token`). Also returns user details and JWT token in response payload.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** Public / Unauthenticated users (Students, Parents, Drivers, College Admins, Super Admins).
+   * - **Access Control:** Public endpoint.
+   *
+   * ### Key Rules & Behavior
+   * - Validates email format and compares password hash via bcrypt.
+   * - Checks if the user account status is ACTIVE before granting access.
+   * - Sets HTTP-only `access_token` cookie with 7-day expiration (`maxAge: 604800000 ms`).
+   * - In production, cookie uses `sameSite: 'none'` and `secure: true`.
+   *
+   * ### Side Effects
+   * - Sets `access_token` HTTP-only cookie on the response client.
+   *
+   * ### Edge Cases & QA Testing Focus
+   * - Inactive or suspended accounts return HTTP 400 with `Account is inactive`.
+   * - Invalid password returns HTTP 400 with `Invalid email or password`.
+   * - Verify cross-site credentials (`withCredentials: true` / `credentials: 'include'`) are required on frontend fetch calls.
+   *
+   * @param body Login credentials containing `email` and `password`.
+   * @Response<ApiResponse>(200, "Login successful. Access token cookie set.")
+   * @Response<ApiResponse>(400, "Invalid credentials or inactive user account.")
+   */
   @Post('/login')
   async login(
     @Body() body: LoginDTO,
@@ -45,6 +73,25 @@ export class AuthController extends Controller {
     }
   }
 
+  /**
+   * Clear session authentication cookie.
+   *
+   * ### Intent & Business Purpose
+   * Invalidates the active user session on the client browser by clearing the HTTP-only `access_token` cookie.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** All authenticated or unauthenticated users.
+   * - **Access Control:** Open endpoint.
+   *
+   * ### Key Rules & Behavior
+   * - Immediately expires the `access_token` cookie (`expires: 1970-01-01T00:00:00.000Z`).
+   * - Clears client-side cookie storage across all paths.
+   *
+   * ### Side Effects
+   * - Clears `access_token` cookie on the response.
+   *
+   * @Response<ApiResponse>(200, "Logged out successfully and session cookie cleared.")
+   */
   @Post('/logout')
   async logout(@Request() req?: express.Request): Promise<ApiResponse> {
     if (req && req.res) {
@@ -66,6 +113,32 @@ export class AuthController extends Controller {
     };
   }
 
+  /**
+   * User self-registration / account onboarding.
+   *
+   * ### Intent & Business Purpose
+   * Creates a new user profile record with specified role and college assignment. Used during user sign-up or admin onboarding workflows.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** Public / Admins.
+   * - **Access Control:** Unauthenticated users or onboarding admins.
+   *
+   * ### Key Rules & Behavior
+   * - Hashes the plain-text password with bcrypt before storage.
+   * - Enforces unique constraint on user `email`.
+   * - Validates target `collegeId` existence if provided.
+   *
+   * ### Side Effects
+   * - Inserts a new row into the `users` table.
+   *
+   * ### Edge Cases & QA Testing Focus
+   * - Duplicate email registration returns HTTP 400 error.
+   * - Invalid `collegeId` returns HTTP 400 foreign key validation error.
+   *
+   * @param body User registration details including `name`, `email`, `password`, `role`, and optional `collegeId`.
+   * @Response<ApiResponse>(200, "User account created successfully.")
+   * @Response<ApiResponse>(400, "Validation error, duplicate email, or missing required fields.")
+   */
   @Post('/register')
   async register(
     @Body() body: RegisterUserDTO,
@@ -88,6 +161,27 @@ export class AuthController extends Controller {
     }
   }
 
+  /**
+   * Retrieve active authenticated user profile (`/me`).
+   *
+   * ### Intent & Business Purpose
+   * Returns complete profile details of the currently authenticated user based on the session JWT token (from HTTP cookie or Authorization header). Used by frontend apps on page load to initialize user context and role-based UI permissions.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** Any authenticated user (`ADMIN`, `COLLEGE_ADMIN`, `DRIVER`, `PARENT`, `STUDENT`).
+   * - **Access Control:** Requires valid JWT in `access_token` cookie or `Authorization: Bearer <token>` header.
+   *
+   * ### Key Rules & Behavior
+   * - Extracts JWT from request, decodes user payload, and attaches `req.user`.
+   * - Includes tenant context: `collegeId`, `collegeName`, and nested `college` object if assigned to a college.
+   *
+   * ### Edge Cases & QA Testing Focus
+   * - Expired or missing JWT returns HTTP 401 Unauthorized.
+   * - Verify profile updates (name/email changes) reflect immediately on `/me` response.
+   *
+   * @Response<ApiResponse>(200, "Active user profile fetched successfully.")
+   * @Response<ApiResponse>(401, "Authentication session cookie missing or invalid.")
+   */
   @Get('/me')
   @Security('jwt')
   async getMe(@Request() req: express.Request): Promise<ApiResponse> {

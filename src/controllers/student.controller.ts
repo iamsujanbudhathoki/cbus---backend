@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Route, Security, Tags } from 'tsoa';
+import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Response, Route, Security, Tags } from 'tsoa';
 import { injectable } from 'tsyringe';
 import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
@@ -14,6 +14,18 @@ export class StudentController extends Controller {
     super();
   }
 
+  /**
+   * List all student records for a college.
+   *
+   * ### Intent & Business Purpose
+   * Retrieves student profiles for a college tenant, including roll number, batch, assigned bus ID, and pickup stop ID.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.
+   *
+   * @param collegeId Optional college UUID filter for Super Admins.
+   * @Response<ApiResponse>(200, "Students list retrieved successfully.")
+   */
   @Get('')
   async getAll(
     @Request() req: express.Request,
@@ -24,6 +36,16 @@ export class StudentController extends Controller {
     return { success: true, message: 'Students fetched successfully', data };
   }
 
+  /**
+   * Get student details by ID.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Student UUID.
+   *
+   * @param id Student UUID.
+   * @Response<ApiResponse>(200, "Student details retrieved successfully.")
+   * @Response<ApiResponse>(404, "Student not found.")
+   */
   @Get('/{id}')
   async getById(
     @Path() id: string,
@@ -38,6 +60,21 @@ export class StudentController extends Controller {
     return { success: true, message: 'Student fetched successfully', data };
   }
 
+  /**
+   * Register a student profile.
+   *
+   * ### Request Body
+   * - `userId` *(required string)*: User account UUID.
+   * - `rollNo` *(required string)*: Roll number or student ID.
+   * - `collegeId` *(required string)*: College UUID.
+   * - `batch` *(optional string)*: Academic batch or year.
+   * - `busId` *(optional string)*: Bus UUID.
+   * - `stopId` *(optional string)*: Pickup stop UUID.
+   *
+   * @param body Student registration payload.
+   * @Response<ApiResponse>(200, "Student profile created.")
+   * @Response<ApiResponse>(400, "Creation error.")
+   */
   @Post('')
   async create(
     @Body() body: CreateStudentDTO,
@@ -54,6 +91,16 @@ export class StudentController extends Controller {
     }
   }
 
+  /**
+   * Update student profile.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Student UUID.
+   *
+   * @param id Student UUID.
+   * @param body Update fields.
+   * @Response<ApiResponse>(200, "Student profile updated.")
+   */
   @Put('/{id}')
   async update(
     @Path() id: string,
@@ -70,6 +117,15 @@ export class StudentController extends Controller {
     }
   }
 
+  /**
+   * Deactivate a student profile.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Student UUID.
+   *
+   * @param id Student UUID.
+   * @Response<ApiResponse>(200, "Student deactivated.")
+   */
   @Delete('/{id}')
   async delete(
     @Path() id: string,
@@ -85,6 +141,16 @@ export class StudentController extends Controller {
     }
   }
 
+  /**
+   * Assign bus to student.
+   *
+   * ### Request Body
+   * - `studentId` *(required string)*: Student UUID.
+   * - `busId` *(required string)*: Bus UUID.
+   *
+   * @param body Bus assignment payload.
+   * @Response<ApiResponse>(200, "Student assigned to bus.")
+   */
   @Post('/assign-bus')
   async assignBus(
     @Body() body: AssignStudentBusDTO,
@@ -101,6 +167,16 @@ export class StudentController extends Controller {
     }
   }
 
+  /**
+   * Assign pickup stop to student.
+   *
+   * ### Request Body
+   * - `studentId` *(required string)*: Student UUID.
+   * - `stopId` *(required string)*: Route stop UUID.
+   *
+   * @param body Pickup stop assignment payload.
+   * @Response<ApiResponse>(200, "Student assigned to route stop.")
+   */
   @Post('/assign-stop')
   async assignStop(
     @Body() body: AssignStudentStopDTO,

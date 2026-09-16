@@ -787,6 +787,7 @@
 						}
 					}
 				},
+				"description": "Update real-time GPS location coordinates of a bus.\n\n### Intent & Business Purpose\nReceives real-time GPS coordinates (latitude, longitude, speed, heading) from driver mobile device or onboard IoT tracking device. Updates live tracking state in Firebase Realtime Database.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n\n### Request Body\n- `busId` *(required string)*: Bus vehicle UUID.\n- `latitude` *(required number)*: GPS latitude coordinate.\n- `longitude` *(required number)*: GPS longitude coordinate.\n- `speed` *(optional number)*: Current vehicle speed (km/h).\n- `heading` *(optional number)*: Heading angle / direction in degrees.\n\n### Side Effects\n- Pushes updated coordinates to Firebase Realtime Database node (`buses/{busId}`).",
 				"tags": [
 					"Live Bus Tracking"
 				],
@@ -797,11 +798,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Real-time GPS location update payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/LocationUpdateDTO"
+								"$ref": "#/components/schemas/LocationUpdateDTO",
+								"description": "Real-time GPS location update payload."
 							}
 						}
 					}
@@ -823,6 +826,7 @@
 						}
 					}
 				},
+				"description": "Get current live GPS location & shift state of a specific bus.\n\n### Intent & Business Purpose\nFetches real-time location, speed, direction, and active shift details for a given bus. Used by students/parents on map views.\n\n### Path Parameters\n- `busId` *(required string)*: Bus UUID.",
 				"tags": [
 					"Live Bus Tracking"
 				],
@@ -833,6 +837,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Bus UUID.",
 						"in": "path",
 						"name": "busId",
 						"required": true,
@@ -858,6 +863,7 @@
 						}
 					}
 				},
+				"description": "Get real-time tracking overview for all buses in a college fleet.\n\n### Intent & Business Purpose\nReturns live location snapshot for all active buses belonging to the college campus. Used by college admins on command center map.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.",
 				"tags": [
 					"Live Bus Tracking"
 				],
@@ -868,6 +874,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college UUID filter.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -893,6 +900,7 @@
 						}
 					}
 				},
+				"description": "List all student records for a college.\n\n### Intent & Business Purpose\nRetrieves student profiles for a college tenant, including roll number, batch, assigned bus ID, and pickup stop ID.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.",
 				"tags": [
 					"Students"
 				],
@@ -903,6 +911,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college UUID filter for Super Admins.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -926,6 +935,7 @@
 						}
 					}
 				},
+				"description": "Register a student profile.\n\n### Request Body\n- `userId` *(required string)*: User account UUID.\n- `rollNo` *(required string)*: Roll number or student ID.\n- `collegeId` *(required string)*: College UUID.\n- `batch` *(optional string)*: Academic batch or year.\n- `busId` *(optional string)*: Bus UUID.\n- `stopId` *(optional string)*: Pickup stop UUID.",
 				"tags": [
 					"Students"
 				],
@@ -936,11 +946,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Student registration payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateStudentDTO"
+								"$ref": "#/components/schemas/CreateStudentDTO",
+								"description": "Student registration payload."
 							}
 						}
 					}
@@ -962,6 +974,7 @@
 						}
 					}
 				},
+				"description": "Get student details by ID.\n\n### Path Parameters\n- `id` *(required string)*: Student UUID.",
 				"tags": [
 					"Students"
 				],
@@ -972,6 +985,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Student UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -995,6 +1009,7 @@
 						}
 					}
 				},
+				"description": "Update student profile.\n\n### Path Parameters\n- `id` *(required string)*: Student UUID.",
 				"tags": [
 					"Students"
 				],
@@ -1005,6 +1020,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Student UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1014,11 +1030,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Update fields.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateStudentDTO"
+								"$ref": "#/components/schemas/UpdateStudentDTO",
+								"description": "Update fields."
 							}
 						}
 					}
@@ -1038,6 +1056,7 @@
 						}
 					}
 				},
+				"description": "Deactivate a student profile.\n\n### Path Parameters\n- `id` *(required string)*: Student UUID.",
 				"tags": [
 					"Students"
 				],
@@ -1048,6 +1067,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Student UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1073,6 +1093,7 @@
 						}
 					}
 				},
+				"description": "Assign bus to student.\n\n### Request Body\n- `studentId` *(required string)*: Student UUID.\n- `busId` *(required string)*: Bus UUID.",
 				"tags": [
 					"Students"
 				],
@@ -1083,11 +1104,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Bus assignment payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AssignStudentBusDTO"
+								"$ref": "#/components/schemas/AssignStudentBusDTO",
+								"description": "Bus assignment payload."
 							}
 						}
 					}
@@ -1109,6 +1132,7 @@
 						}
 					}
 				},
+				"description": "Assign pickup stop to student.\n\n### Request Body\n- `studentId` *(required string)*: Student UUID.\n- `stopId` *(required string)*: Route stop UUID.",
 				"tags": [
 					"Students"
 				],
@@ -1119,11 +1143,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Pickup stop assignment payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AssignStudentStopDTO"
+								"$ref": "#/components/schemas/AssignStudentStopDTO",
+								"description": "Pickup stop assignment payload."
 							}
 						}
 					}
@@ -1145,6 +1171,7 @@
 						}
 					}
 				},
+				"description": "List all transit routes for a college campus.\n\n### Intent & Business Purpose\nFetches bus transit routes, start/end locations, and ordered pickup stops.\n\n### Target Audience & Roles\n- **Allowed Roles:** Authenticated users belonging to the tenant college.",
 				"tags": [
 					"Routes"
 				],
@@ -1155,6 +1182,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college UUID filter for Super Admins.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -1178,6 +1206,7 @@
 						}
 					}
 				},
+				"description": "Create a new transit route.\n\n### Intent & Business Purpose\nCreates a new transit route with name, start point, end point, and college tenant assignment.\n\n### Request Body\n- `name` *(required string)*: Route name (e.g. `Koteshwor - Balkhu Express`).\n- `startLocation` *(required string)*: Route origin location.\n- `endLocation` *(required string)*: Route destination location.\n- `collegeId` *(required string)*: College UUID.",
 				"tags": [
 					"Routes"
 				],
@@ -1188,11 +1217,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Route creation payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateRouteDTO"
+								"$ref": "#/components/schemas/CreateRouteDTO",
+								"description": "Route creation payload."
 							}
 						}
 					}
@@ -1214,6 +1245,7 @@
 						}
 					}
 				},
+				"description": "Get route details and stop list by ID.\n\n### Path Parameters\n- `id` *(required string)*: Route UUID.",
 				"tags": [
 					"Routes"
 				],
@@ -1224,6 +1256,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Route UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1247,6 +1280,7 @@
 						}
 					}
 				},
+				"description": "Update route info.\n\n### Path Parameters\n- `id` *(required string)*: Route UUID.",
 				"tags": [
 					"Routes"
 				],
@@ -1257,6 +1291,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Route UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1266,11 +1301,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Update fields.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateRouteDTO"
+								"$ref": "#/components/schemas/UpdateRouteDTO",
+								"description": "Update fields."
 							}
 						}
 					}
@@ -1290,6 +1327,7 @@
 						}
 					}
 				},
+				"description": "Deactivate a transit route.\n\n### Path Parameters\n- `id` *(required string)*: Route UUID.",
 				"tags": [
 					"Routes"
 				],
@@ -1300,6 +1338,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Route UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1325,6 +1364,7 @@
 						}
 					}
 				},
+				"description": "Add a stop to a route.\n\n### Intent & Business Purpose\nAdds an intermediate pickup/dropoff stop with name, sequence order, latitude, longitude, and estimated arrival time.\n\n### Request Body\n- `routeId` *(required string)*: Target route UUID.\n- `stopName` *(required string)*: Name of stop (e.g. `Kalanki Chowk`).\n- `sequence` *(required number)*: Numerical sequence index on the route.\n- `latitude` *(required number)*: Latitude coordinate.\n- `longitude` *(required number)*: Longitude coordinate.\n- `estimatedTime` *(optional string)*: Estimated arrival time (e.g. `07:30 AM`).",
 				"tags": [
 					"Routes"
 				],
@@ -1335,11 +1375,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Route stop creation payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AddRouteStopDTO"
+								"$ref": "#/components/schemas/AddRouteStopDTO",
+								"description": "Route stop creation payload."
 							}
 						}
 					}
@@ -1361,6 +1403,7 @@
 						}
 					}
 				},
+				"description": "Remove a stop from a route.\n\n### Path Parameters\n- `stopId` *(required string)*: Route stop UUID.",
 				"tags": [
 					"Routes"
 				],
@@ -1371,6 +1414,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Stop UUID.",
 						"in": "path",
 						"name": "stopId",
 						"required": true,
@@ -1396,6 +1440,7 @@
 						}
 					}
 				},
+				"description": "List parents for a college campus.\n\n### Intent & Business Purpose\nFetches parent profiles registered under a specific college campus, including linked student IDs and contact details.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.",
 				"tags": [
 					"Parents"
 				],
@@ -1406,6 +1451,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college UUID filter.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -1429,6 +1475,7 @@
 						}
 					}
 				},
+				"description": "Register a new parent profile.\n\n### Intent & Business Purpose\nRegisters a parent entity linked to a user account and college tenant.\n\n### Request Body\n- `userId` *(required string)*: Associated user UUID.\n- `collegeId` *(required string)*: College UUID.\n- `relationship` *(optional string)*: Relationship (e.g. `Father`, `Mother`, `Guardian`).",
 				"tags": [
 					"Parents"
 				],
@@ -1439,11 +1486,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Parent creation details.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateParentDTO"
+								"$ref": "#/components/schemas/CreateParentDTO",
+								"description": "Parent creation details."
 							}
 						}
 					}
@@ -1465,6 +1514,7 @@
 						}
 					}
 				},
+				"description": "Get parent record by ID.\n\n### Intent & Business Purpose\nRetrieves specific parent profile details and linked student records.\n\n### Path Parameters\n- `id` *(required string)*: Parent UUID.",
 				"tags": [
 					"Parents"
 				],
@@ -1475,6 +1525,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Parent UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1498,6 +1549,7 @@
 						}
 					}
 				},
+				"description": "Update parent profile details.\n\n### Path Parameters\n- `id` *(required string)*: Parent UUID.",
 				"tags": [
 					"Parents"
 				],
@@ -1508,6 +1560,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Parent UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1517,11 +1570,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Update fields.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateParentDTO"
+								"$ref": "#/components/schemas/UpdateParentDTO",
+								"description": "Update fields."
 							}
 						}
 					}
@@ -1541,6 +1596,7 @@
 						}
 					}
 				},
+				"description": "Delete parent profile.\n\n### Path Parameters\n- `id` *(required string)*: Parent UUID.",
 				"tags": [
 					"Parents"
 				],
@@ -1551,6 +1607,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Parent UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1576,6 +1633,7 @@
 						}
 					}
 				},
+				"description": "Get parent record by associated User account ID.\n\n### Intent & Business Purpose\nUsed during login context resolution to find parent entity linked to user ID.\n\n### Path Parameters\n- `userId` *(required string)*: User UUID.",
 				"tags": [
 					"Parents"
 				],
@@ -1586,6 +1644,7 @@
 				],
 				"parameters": [
 					{
+						"description": "User UUID.",
 						"in": "path",
 						"name": "userId",
 						"required": true,
@@ -1611,6 +1670,7 @@
 						}
 					}
 				},
+				"description": "Link a parent profile to a student record.\n\n### Intent & Business Purpose\nEstablishes a parent-student relationship. Enables the parent user to track the bus assigned to their child.\n\n### Request Body\n- `parentId` *(required string)*: Parent UUID.\n- `studentId` *(required string)*: Student UUID.\n\n### Side Effects\n- Creates an association entry in `parent_students` table.",
 				"tags": [
 					"Parents"
 				],
@@ -1621,11 +1681,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Payload with `parentId` and `studentId`.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/LinkStudentDTO"
+								"$ref": "#/components/schemas/LinkStudentDTO",
+								"description": "Payload with `parentId` and `studentId`."
 							}
 						}
 					}
@@ -1647,6 +1709,7 @@
 						}
 					}
 				},
+				"description": "System health check and database connectivity diagnostic.\n\n### Intent & Business Purpose\nProvides real-time operational status of the backend API service and connected PostgreSQL database. Used by load balancers, monitoring tools, devops pipelines, and frontend apps to check system readiness.\n\n### Target Audience & Roles\n- **Allowed Roles:** Public / Unauthenticated.\n- **Access Control:** Open endpoint. No JWT or session cookie required.\n\n### Key Rules & Behavior\n- Executes a lightweight `SELECT 1` query against PostgreSQL via TypeORM (`AppDataSource`).\n- Measures database query response latency in milliseconds.\n- Returns HTTP status `200 OK` when healthy, or HTTP status `503 Service Unavailable` if database connection fails or datasource is uninitialized.\n\n### Edge Cases & QA Testing Focus\n- Verify HTTP 503 status code is returned when the database connection is interrupted.\n- Confirm process uptime counter resets only on server restarts.",
 				"tags": [
 					"Health"
 				],
@@ -1669,6 +1732,7 @@
 						}
 					}
 				},
+				"description": "List drivers for a college campus.\n\n### Intent & Business Purpose\nRetrieves all registered driver profiles associated with a college campus, including license number, assigned bus ID, and phone contact details.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`, `DRIVER`.\n- **Access Control:** Scoped by tenant `collegeId`. Super Admins can filter using `collegeId` query param.",
 				"tags": [
 					"Drivers"
 				],
@@ -1679,6 +1743,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college UUID filter for Super Admins.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -1702,6 +1767,7 @@
 						}
 					}
 				},
+				"description": "Register a new driver profile.\n\n### Intent & Business Purpose\nCreates a driver account linked to a user account, assigning driving license details and college tenant.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.\n\n### Request Body\n- `userId` *(required string)*: Associated user account UUID.\n- `licenseNumber` *(required string)*: Official driving license registration number.\n- `collegeId` *(required string)*: College UUID.\n- `busId` *(optional string)*: Assigned bus vehicle UUID.\n\n### Side Effects\n- Creates a record in the `drivers` table and updates user role to `DRIVER`.",
 				"tags": [
 					"Drivers"
 				],
@@ -1712,11 +1778,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Driver registration payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateDriverDTO"
+								"$ref": "#/components/schemas/CreateDriverDTO",
+								"description": "Driver registration payload."
 							}
 						}
 					}
@@ -1738,6 +1806,7 @@
 						}
 					}
 				},
+				"description": "Get driver profile details by ID.\n\n### Intent & Business Purpose\nFetches specific driver record, associated user profile info, driving license number, and assigned bus.\n\n### Path Parameters\n- `id` *(required string)*: Driver UUID.",
 				"tags": [
 					"Drivers"
 				],
@@ -1748,6 +1817,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Driver UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1771,6 +1841,7 @@
 						}
 					}
 				},
+				"description": "Update driver information.\n\n### Intent & Business Purpose\nUpdates driver license details, assigned bus vehicle, or contact information.\n\n### Path Parameters\n- `id` *(required string)*: Driver UUID.",
 				"tags": [
 					"Drivers"
 				],
@@ -1781,6 +1852,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Driver UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1790,11 +1862,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Updates payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateDriverDTO"
+								"$ref": "#/components/schemas/UpdateDriverDTO",
+								"description": "Updates payload."
 							}
 						}
 					}
@@ -1814,6 +1888,7 @@
 						}
 					}
 				},
+				"description": "Deactivate driver profile.\n\n### Intent & Business Purpose\nDeactivates a driver profile from active campus operations.\n\n### Path Parameters\n- `id` *(required string)*: Driver UUID.",
 				"tags": [
 					"Drivers"
 				],
@@ -1824,6 +1899,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Driver UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1849,6 +1925,7 @@
 						}
 					}
 				},
+				"description": "Fetch active driver portal dashboard state.\n\n### Intent & Business Purpose\nRetrieves active shift details, assigned bus info, assigned route stops, and current active shift status for the authenticated driver.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n- **Access Control:** Requires active driver session JWT.",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -1875,6 +1952,7 @@
 						}
 					}
 				},
+				"description": "Start a new driving shift & initiate live GPS tracking.\n\n### Intent & Business Purpose\nInitiates an active bus shift for the authenticated driver. Marks the bus as active on live tracking maps and initializes Firebase Realtime DB tracking node.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n\n### Side Effects\n- Inserts active shift into `driver_shifts` table with status `ONGOING` / `STARTED`.\n- Initializes live tracking node in Firebase Realtime Database.\n\n### Edge Cases & QA Testing Focus\n- Attempting to start a shift while another shift is currently active returns HTTP 400.",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -1885,11 +1963,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Optional start shift parameters (overriding bus/route if applicable).",
 					"required": false,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/StartShiftDTO"
+								"$ref": "#/components/schemas/StartShiftDTO",
+								"description": "Optional start shift parameters (overriding bus/route if applicable)."
 							}
 						}
 					}
@@ -1911,6 +1991,7 @@
 						}
 					}
 				},
+				"description": "Update notes or remarks for an ongoing or completed shift.\n\n### Intent & Business Purpose\nAllows drivers to append operational notes (e.g. traffic delays, route detours, fuel stops, incidents).\n\n### Path Parameters\n- `id` *(required string)*: Driver shift UUID.",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -1921,6 +2002,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Driver shift UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1930,11 +2012,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Payload containing `notes` text.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateNotesDTO"
+								"$ref": "#/components/schemas/UpdateNotesDTO",
+								"description": "Payload containing `notes` text."
 							}
 						}
 					}
@@ -1956,6 +2040,7 @@
 						}
 					}
 				},
+				"description": "Complete & end an active driving shift.\n\n### Intent & Business Purpose\nEnds an active driver shift, records end timestamp, calculates total shift duration, and sets tracking status to completed.\n\n### Path Parameters\n- `id` *(required string)*: Shift UUID.\n\n### Side Effects\n- Updates shift record status to `COMPLETED` and sets `endedAt` timestamp.\n- Clears / updates active tracking node in Firebase Realtime DB.",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -1966,6 +2051,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Shift UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -1991,6 +2077,7 @@
 						}
 					}
 				},
+				"description": "Get driver's historical shift logs.\n\n### Intent & Business Purpose\nRetrieves past shift logs for the authenticated driver filtered by date range (e.g. `today`, `week`, `month`, `all`).\n\n### Query Parameters\n- `range` *(optional string)*: Date range filter (`today`, `week`, `month`, `all`).",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -2001,6 +2088,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional date range filter.",
 						"in": "query",
 						"name": "range",
 						"required": false,
@@ -2026,6 +2114,7 @@
 						}
 					}
 				},
+				"description": "Administrative view of driver shifts across college campus.\n\n### Intent & Business Purpose\nAllows college admins to inspect active and past driver shifts across the fleet, filter by driver ID, and audit shift completion.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.\n\n### Query Parameters\n- `collegeId` *(optional string)*: Filter by target college UUID.\n- `driverId` *(optional string)*: Filter by specific driver UUID.",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -2036,6 +2125,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college UUID filter.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -2044,6 +2134,7 @@
 						}
 					},
 					{
+						"description": "Optional driver UUID filter.",
 						"in": "query",
 						"name": "driverId",
 						"required": false,
@@ -2069,6 +2160,7 @@
 						}
 					}
 				},
+				"description": "List all colleges on the platform.\n\n### Intent & Business Purpose\nReturns a list of active college tenants registered on the bus tracking platform.\n\n### Target Audience & Roles\n- **Allowed Roles:** Authenticated users (`ADMIN`, `COLLEGE_ADMIN`, `DRIVER`, `PARENT`, `STUDENT`).",
 				"tags": [
 					"Colleges"
 				],
@@ -2093,6 +2185,7 @@
 						}
 					}
 				},
+				"description": "Register a new college tenant.\n\n### Intent & Business Purpose\nCreates a new college organization entity on the platform. Enables multi-tenancy for the new institution.\n\n### Target Audience & Roles\n- **Allowed Roles:** System Administrator (`ADMIN`).\n\n### Request Body\n- `name` *(required string)*: Full college name (e.g. `Kathmandu University`).\n- `code` *(required string)*: Unique short code (e.g. `KU`).\n- `address` *(optional string)*: Physical address.\n- `contactEmail` *(optional string)*: Primary administrative email.\n\n### Side Effects\n- Inserts a new row into the `colleges` table.",
 				"tags": [
 					"Colleges"
 				],
@@ -2105,11 +2198,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "College registration details.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateCollegeDTO"
+								"$ref": "#/components/schemas/CreateCollegeDTO",
+								"description": "College registration details."
 							}
 						}
 					}
@@ -2131,6 +2226,7 @@
 						}
 					}
 				},
+				"description": "Platform-wide aggregated analytics & metrics.\n\n### Intent & Business Purpose\nProvides high-level platform health metrics including total colleges, total active fleet buses, active drivers, registered students, and active tracking shifts across all tenants.\n\n### Target Audience & Roles\n- **Allowed Roles:** System Administrator (`ADMIN`) only.\n- **Access Control:** Restricted to Super Admin role.",
 				"tags": [
 					"Colleges"
 				],
@@ -2159,6 +2255,7 @@
 						}
 					}
 				},
+				"description": "Get college details by ID.\n\n### Intent & Business Purpose\nFetches specific college profile details, contact information, location coordinates, and active status.\n\n### Path Parameters\n- `id` *(required string)*: College UUID.",
 				"tags": [
 					"Colleges"
 				],
@@ -2169,6 +2266,7 @@
 				],
 				"parameters": [
 					{
+						"description": "College UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2192,6 +2290,7 @@
 						}
 					}
 				},
+				"description": "Update college profile details.\n\n### Intent & Business Purpose\nModifies college tenant information, address, contact details, or active status.\n\n### Target Audience & Roles\n- **Allowed Roles:** System Administrator (`ADMIN`).\n\n### Path Parameters\n- `id` *(required string)*: College UUID.",
 				"tags": [
 					"Colleges"
 				],
@@ -2204,6 +2303,7 @@
 				],
 				"parameters": [
 					{
+						"description": "College UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2213,11 +2313,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Updates payload.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateCollegeDTO"
+								"$ref": "#/components/schemas/UpdateCollegeDTO",
+								"description": "Updates payload."
 							}
 						}
 					}
@@ -2237,6 +2339,7 @@
 						}
 					}
 				},
+				"description": "Deactivate a college tenant.\n\n### Intent & Business Purpose\nSoft deletes / deactivates a college tenant from the system.\n\n### Target Audience & Roles\n- **Allowed Roles:** System Administrator (`ADMIN`).\n\n### Path Parameters\n- `id` *(required string)*: College UUID.",
 				"tags": [
 					"Colleges"
 				],
@@ -2249,6 +2352,7 @@
 				],
 				"parameters": [
 					{
+						"description": "College UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2274,6 +2378,7 @@
 						}
 					}
 				},
+				"description": "Get tenant dashboard metrics.\n\n### Intent & Business Purpose\nReturns specific college campus operational metrics (active buses count, total drivers, active routes, student headcount, active shifts).\n\n### Path Parameters\n- `id` *(required string)*: College UUID.",
 				"tags": [
 					"Colleges"
 				],
@@ -2284,6 +2389,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Target college UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2309,6 +2415,7 @@
 						}
 					}
 				},
+				"description": "List all buses (filtered by college tenant).\n\n### Intent & Business Purpose\nFetches the list of registered buses assigned to a college campus. Used by fleet managers, admins, and tracking dashboards.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`, `DRIVER`, `PARENT`, `STUDENT`.\n- **Access Control:** Requires valid JWT. College Admins and users are scoped strictly to their assigned `collegeId`. Super Admins can pass optional `collegeId` query parameter.\n\n### Query Parameters\n- `collegeId` *(optional string)*: Target college UUID. Overridden for tenant users.\n\n### Edge Cases & QA Testing Focus\n- Verify multi-tenant isolation: College A users cannot view buses from College B.\n- Returns empty array if no buses are registered for the tenant.",
 				"tags": [
 					"Buses"
 				],
@@ -2319,6 +2426,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Optional college ID filter for Super Admins.",
 						"in": "query",
 						"name": "collegeId",
 						"required": false,
@@ -2342,6 +2450,7 @@
 						}
 					}
 				},
+				"description": "Register a new fleet bus.\n\n### Intent & Business Purpose\nAdds a new bus vehicle to the college fleet inventory with registration number, capacity, and model info.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.\n- **Access Control:** Tenant College Admin or Super Admin.\n\n### Request Body\n- `busNumber` *(required string)*: Unique vehicle registration or plate number (e.g. `Ba 1 Pa 1234`).\n- `capacity` *(required number)*: Passenger seating capacity.\n- `model` *(optional string)*: Vehicle make/model.\n- `collegeId` *(required string)*: Associated college ID.\n\n### Side Effects\n- Inserts a new record into the `buses` table.\n\n### Edge Cases & QA Testing Focus\n- Enforces unique `busNumber` per college tenant. Duplicate registration number returns HTTP 400.",
 				"tags": [
 					"Buses"
 				],
@@ -2352,11 +2461,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Bus registration details.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateBusDTO"
+								"$ref": "#/components/schemas/CreateBusDTO",
+								"description": "Bus registration details."
 							}
 						}
 					}
@@ -2378,6 +2489,7 @@
 						}
 					}
 				},
+				"description": "Get bus details by ID.\n\n### Intent & Business Purpose\nRetrieves complete profile, current status, assigned driver, and assigned route details for a specific bus.\n\n### Target Audience & Roles\n- **Allowed Roles:** Authenticated users belonging to the tenant college.\n\n### Path Parameters\n- `id` *(required string)*: Unique UUID of the bus.\n\n### Edge Cases & QA Testing Focus\n- Accessing a bus ID belonging to a different college tenant returns HTTP 404 Not Found.",
 				"tags": [
 					"Buses"
 				],
@@ -2388,6 +2500,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Unique bus UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2411,6 +2524,7 @@
 						}
 					}
 				},
+				"description": "Update bus details.\n\n### Intent & Business Purpose\nUpdates vehicle information, status (`ACTIVE`, `MAINTENANCE`, `INACTIVE`), or capacity.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.\n\n### Path Parameters\n- `id` *(required string)*: Bus UUID.\n\n### Side Effects\n- Modifies existing `buses` table row.",
 				"tags": [
 					"Buses"
 				],
@@ -2421,6 +2535,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Bus UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2430,11 +2545,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "Fields to update.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UpdateBusDTO"
+								"$ref": "#/components/schemas/UpdateBusDTO",
+								"description": "Fields to update."
 							}
 						}
 					}
@@ -2454,6 +2571,7 @@
 						}
 					}
 				},
+				"description": "Soft-delete / deactivate a bus.\n\n### Intent & Business Purpose\nSoft-deactivates a bus record from active operational fleet views.\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.\n\n### Path Parameters\n- `id` *(required string)*: Bus UUID.\n\n### Side Effects\n- Sets bus status to `INACTIVE` / soft deletes record.",
 				"tags": [
 					"Buses"
 				],
@@ -2464,6 +2582,7 @@
 				],
 				"parameters": [
 					{
+						"description": "Bus UUID.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -2489,6 +2608,7 @@
 						}
 					}
 				},
+				"description": "Assign bus to a specific transit route.\n\n### Intent & Business Purpose\nMaps a bus vehicle to a designated pickup/dropoff transit route (`routeId`).\n\n### Target Audience & Roles\n- **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.\n\n### Request Body\n- `busId` *(required string)*: Bus UUID.\n- `routeId` *(required string)*: Route UUID.\n- `collegeId` *(optional string)*: College UUID.\n\n### Side Effects\n- Updates `routeId` foreign key on the `buses` record.\n\n### Edge Cases & QA Testing Focus\n- Verify route belongs to the same college tenant.",
 				"tags": [
 					"Buses"
 				],
@@ -2499,11 +2619,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Assignment payload containing `busId` and `routeId`.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AssignBusRouteDTO"
+								"$ref": "#/components/schemas/AssignBusRouteDTO",
+								"description": "Assignment payload containing `busId` and `routeId`."
 							}
 						}
 					}
@@ -2525,17 +2647,20 @@
 						}
 					}
 				},
+				"description": "User authentication & HTTP-only cookie issuance.\n\n### Intent & Business Purpose\nAuthenticates user credentials (email and password), validates user account status, and issues a JWT token set as a secure HTTP-only cookie (`access_token`). Also returns user details and JWT token in response payload.\n\n### Target Audience & Roles\n- **Allowed Roles:** Public / Unauthenticated users (Students, Parents, Drivers, College Admins, Super Admins).\n- **Access Control:** Public endpoint.\n\n### Key Rules & Behavior\n- Validates email format and compares password hash via bcrypt.\n- Checks if the user account status is ACTIVE before granting access.\n- Sets HTTP-only `access_token` cookie with 7-day expiration (`maxAge: 604800000 ms`).\n- In production, cookie uses `sameSite: 'none'` and `secure: true`.\n\n### Side Effects\n- Sets `access_token` HTTP-only cookie on the response client.\n\n### Edge Cases & QA Testing Focus\n- Inactive or suspended accounts return HTTP 400 with `Account is inactive`.\n- Invalid password returns HTTP 400 with `Invalid email or password`.\n- Verify cross-site credentials (`withCredentials: true` / `credentials: 'include'`) are required on frontend fetch calls.",
 				"tags": [
 					"Authentication"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "Login credentials containing `email` and `password`.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/LoginDTO"
+								"$ref": "#/components/schemas/LoginDTO",
+								"description": "Login credentials containing `email` and `password`."
 							}
 						}
 					}
@@ -2557,6 +2682,7 @@
 						}
 					}
 				},
+				"description": "Clear session authentication cookie.\n\n### Intent & Business Purpose\nInvalidates the active user session on the client browser by clearing the HTTP-only `access_token` cookie.\n\n### Target Audience & Roles\n- **Allowed Roles:** All authenticated or unauthenticated users.\n- **Access Control:** Open endpoint.\n\n### Key Rules & Behavior\n- Immediately expires the `access_token` cookie (`expires: 1970-01-01T00:00:00.000Z`).\n- Clears client-side cookie storage across all paths.\n\n### Side Effects\n- Clears `access_token` cookie on the response.",
 				"tags": [
 					"Authentication"
 				],
@@ -2579,17 +2705,20 @@
 						}
 					}
 				},
+				"description": "User self-registration / account onboarding.\n\n### Intent & Business Purpose\nCreates a new user profile record with specified role and college assignment. Used during user sign-up or admin onboarding workflows.\n\n### Target Audience & Roles\n- **Allowed Roles:** Public / Admins.\n- **Access Control:** Unauthenticated users or onboarding admins.\n\n### Key Rules & Behavior\n- Hashes the plain-text password with bcrypt before storage.\n- Enforces unique constraint on user `email`.\n- Validates target `collegeId` existence if provided.\n\n### Side Effects\n- Inserts a new row into the `users` table.\n\n### Edge Cases & QA Testing Focus\n- Duplicate email registration returns HTTP 400 error.\n- Invalid `collegeId` returns HTTP 400 foreign key validation error.",
 				"tags": [
 					"Authentication"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "User registration details including `name`, `email`, `password`, `role`, and optional `collegeId`.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RegisterUserDTO"
+								"$ref": "#/components/schemas/RegisterUserDTO",
+								"description": "User registration details including `name`, `email`, `password`, `role`, and optional `collegeId`."
 							}
 						}
 					}
@@ -2611,6 +2740,7 @@
 						}
 					}
 				},
+				"description": "Retrieve active authenticated user profile (`/me`).\n\n### Intent & Business Purpose\nReturns complete profile details of the currently authenticated user based on the session JWT token (from HTTP cookie or Authorization header). Used by frontend apps on page load to initialize user context and role-based UI permissions.\n\n### Target Audience & Roles\n- **Allowed Roles:** Any authenticated user (`ADMIN`, `COLLEGE_ADMIN`, `DRIVER`, `PARENT`, `STUDENT`).\n- **Access Control:** Requires valid JWT in `access_token` cookie or `Authorization: Bearer <token>` header.\n\n### Key Rules & Behavior\n- Extracts JWT from request, decodes user payload, and attaches `req.user`.\n- Includes tenant context: `collegeId`, `collegeName`, and nested `college` object if assigned to a college.\n\n### Edge Cases & QA Testing Focus\n- Expired or missing JWT returns HTTP 401 Unauthorized.\n- Verify profile updates (name/email changes) reflect immediately on `/me` response.",
 				"tags": [
 					"Authentication"
 				],
@@ -2637,6 +2767,7 @@
 						}
 					}
 				},
+				"description": "Upload media asset (images / avatars / documents).\n\n### Intent & Business Purpose\nUploads binary files (profile pictures, vehicle documents, route maps) and returns stored file URL path.\n\n### Target Audience & Roles\n- **Allowed Roles:** Authenticated users.",
 				"tags": [
 					"Media"
 				],
@@ -2659,17 +2790,20 @@
 						}
 					}
 				},
+				"description": "Super Admin portal authentication.\n\n### Intent & Business Purpose\nAuthenticates platform Super Administrators into the central multi-tenant management portal.\n\n### Target Audience & Roles\n- **Allowed Roles:** System Administrators (`ADMIN`).\n- **Access Control:** Public endpoint specifically for platform super admin authentication.\n\n### Key Rules & Behavior\n- Validates admin credentials against system admin accounts.\n- Returns admin user details and bearer authorization token.",
 				"tags": [
 					"Admin Auth System"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "Admin login credentials including admin email/username and password.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AdminAuthSchema"
+								"$ref": "#/components/schemas/AdminAuthSchema",
+								"description": "Admin login credentials including admin email/username and password."
 							}
 						}
 					}

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Route, Security, Tags } from 'tsoa';
+import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Response, Route, Security, Tags } from 'tsoa';
 import { injectable } from 'tsyringe';
 import express from 'express';
 import { ApiResponse } from '../interfaces/apiResponse.interface';
@@ -14,6 +14,18 @@ export class ParentController extends Controller {
     super();
   }
 
+  /**
+   * List parents for a college campus.
+   *
+   * ### Intent & Business Purpose
+   * Fetches parent profiles registered under a specific college campus, including linked student IDs and contact details.
+   *
+   * ### Target Audience & Roles
+   * - **Allowed Roles:** `ADMIN`, `COLLEGE_ADMIN`.
+   *
+   * @param collegeId Optional college UUID filter.
+   * @Response<ApiResponse>(200, "Parents list fetched successfully.")
+   */
   @Get('')
   async getAll(
     @Request() req: express.Request,
@@ -24,6 +36,19 @@ export class ParentController extends Controller {
     return { success: true, message: 'Parents fetched successfully', data };
   }
 
+  /**
+   * Get parent record by ID.
+   *
+   * ### Intent & Business Purpose
+   * Retrieves specific parent profile details and linked student records.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Parent UUID.
+   *
+   * @param id Parent UUID.
+   * @Response<ApiResponse>(200, "Parent profile retrieved successfully.")
+   * @Response<ApiResponse>(404, "Parent not found.")
+   */
   @Get('/{id}')
   async getById(
     @Path() id: string,
@@ -38,6 +63,19 @@ export class ParentController extends Controller {
     return { success: true, message: 'Parent fetched successfully', data };
   }
 
+  /**
+   * Get parent record by associated User account ID.
+   *
+   * ### Intent & Business Purpose
+   * Used during login context resolution to find parent entity linked to user ID.
+   *
+   * ### Path Parameters
+   * - `userId` *(required string)*: User UUID.
+   *
+   * @param userId User UUID.
+   * @Response<ApiResponse>(200, "Parent profile retrieved.")
+   * @Response<ApiResponse>(404, "Parent profile not found.")
+   */
   @Get('/user/{userId}')
   async getByUserId(@Path() userId: string): Promise<ApiResponse> {
     const data = await this.parentService.getParentByUserId(userId);
@@ -48,6 +86,21 @@ export class ParentController extends Controller {
     return { success: true, message: 'Parent profile fetched successfully', data };
   }
 
+  /**
+   * Register a new parent profile.
+   *
+   * ### Intent & Business Purpose
+   * Registers a parent entity linked to a user account and college tenant.
+   *
+   * ### Request Body
+   * - `userId` *(required string)*: Associated user UUID.
+   * - `collegeId` *(required string)*: College UUID.
+   * - `relationship` *(optional string)*: Relationship (e.g. `Father`, `Mother`, `Guardian`).
+   *
+   * @param body Parent creation details.
+   * @Response<ApiResponse>(200, "Parent profile created.")
+   * @Response<ApiResponse>(400, "Creation error.")
+   */
   @Post('')
   async create(
     @Body() body: CreateParentDTO,
@@ -64,6 +117,16 @@ export class ParentController extends Controller {
     }
   }
 
+  /**
+   * Update parent profile details.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Parent UUID.
+   *
+   * @param id Parent UUID.
+   * @param body Update fields.
+   * @Response<ApiResponse>(200, "Parent profile updated.")
+   */
   @Put('/{id}')
   async update(
     @Path() id: string,
@@ -80,6 +143,15 @@ export class ParentController extends Controller {
     }
   }
 
+  /**
+   * Delete parent profile.
+   *
+   * ### Path Parameters
+   * - `id` *(required string)*: Parent UUID.
+   *
+   * @param id Parent UUID.
+   * @Response<ApiResponse>(200, "Parent profile deleted.")
+   */
   @Delete('/{id}')
   async delete(
     @Path() id: string,
@@ -95,6 +167,23 @@ export class ParentController extends Controller {
     }
   }
 
+  /**
+   * Link a parent profile to a student record.
+   *
+   * ### Intent & Business Purpose
+   * Establishes a parent-student relationship. Enables the parent user to track the bus assigned to their child.
+   *
+   * ### Request Body
+   * - `parentId` *(required string)*: Parent UUID.
+   * - `studentId` *(required string)*: Student UUID.
+   *
+   * ### Side Effects
+   * - Creates an association entry in `parent_students` table.
+   *
+   * @param body Payload with `parentId` and `studentId`.
+   * @Response<ApiResponse>(200, "Parent linked to student successfully.")
+   * @Response<ApiResponse>(400, "Linking failed or record not found.")
+   */
   @Post('/link-student')
   async linkStudent(@Body() body: LinkStudentDTO): Promise<ApiResponse> {
     try {
