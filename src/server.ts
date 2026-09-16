@@ -4,7 +4,6 @@ import { AppDataSource } from './config/database.config';
 import { DotenvConfig } from './config/env.config';
 import { configMiddleware } from './middlewares';
 import { PathUtils } from './utils/path.util';
-// import { RedisUtil } from './utils/redis.util';
 
 class Server {
   constructor() {
@@ -19,7 +18,6 @@ class Server {
         console.log('Data Source has been initialized!');
         const app = express();
         configMiddleware(app);
-        // new RedisUtil().initialize();
         app.listen(DotenvConfig.PORT, () => {
           console.log('TCP server established');
         });
