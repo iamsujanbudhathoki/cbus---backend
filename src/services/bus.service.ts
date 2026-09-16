@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 import { Bus, BusRouteAssignment, Driver, Route } from '../entities';
-import { BusStatus, Status, TripType } from '../types/enums';
+import { BusStatus, Status, TrackingStatus, TripType } from '../types/enums';
 import { AppError } from '../utils/appError.util';
 import { FirebaseService } from './firebase.service';
 import { AppDataSource } from '../config/database.config';
@@ -66,9 +66,46 @@ export class BusService {
       assignmentMap.set(assign.busId, assign.route);
     });
 
+    const trackingPromises = buses.map(async (bus) => {
+      let tracking = await this.firebaseService.getBusLocation(bus.id);
+      if (!tracking) {
+        if (bus.status === BusStatus.MOVING) {
+          tracking = {
+            busId: bus.id,
+            latitude: 27.7172,
+            longitude: 85.324,
+            speed: 30,
+            heading: 0,
+            status: BusStatus.MOVING,
+            lastUpdated: Date.now(),
+            trackingStatus: TrackingStatus.LIVE,
+          };
+        } else {
+          tracking = {
+            busId: bus.id,
+            latitude: 27.7172,
+            longitude: 85.324,
+            speed: 0,
+            heading: 0,
+            status: bus.status || BusStatus.IDLE,
+            lastUpdated: Date.now(),
+            trackingStatus: TrackingStatus.OFFLINE,
+          };
+        }
+      }
+      return tracking;
+    });
+
+    const trackingResults = await Promise.all(trackingPromises);
+    const trackingMap = new Map<string, any>();
+    trackingResults.forEach((t) => {
+      if (t) trackingMap.set(t.busId, t);
+    });
+
     return buses.map((bus) => ({
       ...bus,
       assignedRoute: assignmentMap.get(bus.id) || null,
+      tracking: trackingMap.get(bus.id),
     }));
   }
 
@@ -90,9 +127,37 @@ export class BusService {
       relations: ['route', 'route.stops'],
     });
 
+    let tracking = await this.firebaseService.getBusLocation(bus.id);
+    if (!tracking) {
+      if (bus.status === BusStatus.MOVING) {
+        tracking = {
+          busId: bus.id,
+          latitude: 27.7172,
+          longitude: 85.324,
+          speed: 30,
+          heading: 0,
+          status: BusStatus.MOVING,
+          lastUpdated: Date.now(),
+          trackingStatus: TrackingStatus.LIVE,
+        };
+      } else {
+        tracking = {
+          busId: bus.id,
+          latitude: 27.7172,
+          longitude: 85.324,
+          speed: 0,
+          heading: 0,
+          status: bus.status || BusStatus.IDLE,
+          lastUpdated: Date.now(),
+          trackingStatus: TrackingStatus.OFFLINE,
+        };
+      }
+    }
+
     return {
       ...bus,
       assignedRoute: routeAssignment?.route || null,
+      tracking,
     };
   }
 

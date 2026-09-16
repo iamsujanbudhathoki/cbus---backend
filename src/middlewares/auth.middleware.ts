@@ -24,6 +24,11 @@ export const verifyToken = (token: string): JwtUserPayload | null => {
 };
 
 export const getTokenFromRequest = (req: Request): string | null => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+
   if (req.cookies && req.cookies[COOKIE_NAME]) {
     return req.cookies[COOKIE_NAME];
   }

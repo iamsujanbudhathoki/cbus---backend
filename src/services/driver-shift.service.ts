@@ -99,17 +99,15 @@ export class DriverShiftService {
       return result;
     });
 
-    // Sync active state to Firebase Realtime Database
-    try {
-      await this.firebaseService.updateBusLocation(savedShift.busId, {
-        latitude: 27.7172,
-        longitude: 85.324,
-        speed: 30,
-        status: BusStatus.MOVING,
-      });
-    } catch (e) {
+    // Sync active state to Firebase Realtime Database in background (non-blocking)
+    this.firebaseService.updateBusLocation(savedShift.busId, {
+      latitude: 27.7172,
+      longitude: 85.324,
+      speed: 30,
+      status: BusStatus.MOVING,
+    }).catch((e) => {
       console.error('[DriverShiftService] Error syncing startShift to Firebase:', e);
-    }
+    });
 
     return savedShift;
   }
@@ -169,17 +167,15 @@ export class DriverShiftService {
       return result;
     });
 
-    // Sync ended offline state to Firebase Realtime Database
-    try {
-      await this.firebaseService.updateBusLocation(savedShift.busId, {
-        latitude: 27.7172,
-        longitude: 85.324,
-        speed: 0,
-        status: BusStatus.OFFLINE,
-      });
-    } catch (e) {
+    // Sync ended offline state to Firebase Realtime Database in background (non-blocking)
+    this.firebaseService.updateBusLocation(savedShift.busId, {
+      latitude: 27.7172,
+      longitude: 85.324,
+      speed: 0,
+      status: BusStatus.OFFLINE,
+    }).catch((e) => {
       console.error('[DriverShiftService] Error syncing endShift to Firebase:', e);
-    }
+    });
 
     return savedShift;
   }

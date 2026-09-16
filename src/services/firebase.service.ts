@@ -18,6 +18,13 @@ export interface TrackingResponse extends BusLocationState {
 // In-memory fallback tracking store for local development without live Firebase credentials
 const inMemoryLocationStore = new Map<string, BusLocationState>();
 
+function withTimeout<T>(promise: Promise<T>, ms: number = 1500): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
 @singleton()
 export class FirebaseService {
   private db: any = null;
@@ -74,26 +81,33 @@ export class FirebaseService {
 
     inMemoryLocationStore.set(busId, locationState);
 
-    if (this.db) {
-      try {
-        await this.db.ref(`buses/${busId}`).set(locationState);
-      } catch (err) {
-        console.error(`[FirebaseService] Error updating Firebase via admin SDK for bus ${busId}:`, err);
+    // Push to Firebase asynchronously in background without blocking API response
+    (async () => {
+      if (this.db) {
+        try {
+          await withTimeout(this.db.ref(`buses/${busId}`).set(locationState), 1500);
+        } catch (err) {
+          console.error(`[FirebaseService] Error updating Firebase via admin SDK for bus ${busId}:`, err);
+        }
       }
-    }
 
-    const databaseURL = process.env.FIREBASE_DATABASE_URL;
-    if (databaseURL) {
-      try {
-        await fetch(`${databaseURL}/buses/${busId}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(locationState),
-        });
-      } catch (restErr) {
-        // Silent REST catch
+      const databaseURL = process.env.FIREBASE_DATABASE_URL;
+      if (databaseURL) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 1500);
+          await fetch(`${databaseURL}/buses/${busId}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(locationState),
+            signal: controller.signal,
+          });
+          clearTimeout(timer);
+        } catch (restErr) {
+          // Silent REST catch
+        }
       }
-    }
+    })();
 
     return locationState;
   }
@@ -103,8 +117,8 @@ export class FirebaseService {
 
     if (this.db) {
       try {
-        const snapshot = await this.db.ref(`buses/${busId}`).once('value');
-        if (snapshot.exists()) {
+        const snapshot: any = await withTimeout(this.db.ref(`buses/${busId}`).once('value'), 1500);
+        if (snapshot && typeof snapshot.exists === 'function' && snapshot.exists()) {
           state = snapshot.val();
         }
       } catch (err) {
@@ -142,9 +156,10 @@ export class FirebaseService {
 
     const diffSeconds = (Date.now() - lastUpdated) / 1000;
 
-    if (diffSeconds <= 30) {
+    if (diffSeconds <= 120 || currentStatus === BusStatus.MOVING) {
+      if (diffSeconds > 600) return TrackingStatus.STALE;
       return TrackingStatus.LIVE;
-    } else if (diffSeconds <= 120) {
+    } else if (diffSeconds <= 600) {
       return TrackingStatus.STALE;
     } else {
       return TrackingStatus.OFFLINE;
