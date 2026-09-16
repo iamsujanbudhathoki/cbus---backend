@@ -57,10 +57,9 @@ export const configMiddleware = (app: express.Application) => {
     }),
   );
 
-  if (DotenvConfig.NODE_ENV === Environment.DEVELOPMENT) {
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-    app.use('/swagger-json', (req, res) => res.send(swaggerUi));
-  }
+  // API Documentation (Available in all environments)
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use('/swagger-json', (req, res) => res.json(swaggerDocument));
   app.use(express.static(DotenvConfig.MEDIA_UPLOAD_PATH!));
 
   const healthCheckHandler = async (req: express.Request, res: express.Response) => {

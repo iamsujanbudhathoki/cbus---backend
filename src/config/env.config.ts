@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 export enum Environment {
-  DEVELOPMENT = 'DEVELOPMENT',
-  PRODUCTION = 'PRODUCTION',
-  TEST = 'TEST',
+  DEVELOPMENT = 'development',
+  PRODUCTION = 'production',
+  TEST = 'test',
 }
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -12,7 +12,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 class DotenvConfig {
   // APP
   static PORT = process.env.PORT || 5000;
-  static NODE_ENV = process.env.NODE_ENV || 'development';
+  static NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase();
 
   // DB
   static DATABASE_URL = process.env.DATABASE_URL;
