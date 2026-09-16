@@ -38,6 +38,13 @@ export interface AssignStudentStopDTO {
   assignmentType?: AssignmentType;
 }
 
+function normalizeUuid(id?: string | null): string | null {
+  if (!id || id === 'none' || id === 'unassigned' || id.trim() === '' || id === 'null' || id === 'undefined') {
+    return null;
+  }
+  return id.trim();
+}
+
 @singleton()
 export class StudentService {
   async getStudentsByCollege(collegeId?: string): Promise<any[]> {
@@ -186,10 +193,12 @@ export class StudentService {
     await student.save();
   }
 
-  async assignBusToStudent(dto: AssignStudentBusDTO, tenantCollegeId?: string): Promise<StudentBusAssignment> {
+  async assignBusToStudent(dto: AssignStudentBusDTO, tenantCollegeId?: string): Promise<StudentBusAssignment | null> {
     if (tenantCollegeId && dto.collegeId !== tenantCollegeId) {
       throw AppError.forbidden('Cannot assign bus outside your authorized college scope');
     }
+
+    const busId = normalizeUuid(dto.busId);
 
     return await AppDataSource.transaction(async (manager) => {
       const student = await manager.findOne(Student, { where: { id: dto.studentId } });
@@ -198,21 +207,25 @@ export class StudentService {
         throw AppError.forbidden('Cannot assign bus to student outside your authorized college scope');
       }
 
-      const bus = await manager.findOne(Bus, { where: { id: dto.busId } });
-      if (!bus) throw AppError.notFound('Bus not found');
-      if (bus.collegeId !== student.collegeId) {
-        throw AppError.forbidden('Cannot assign bus from another college to this student');
-      }
-
       await manager.update(
         StudentBusAssignment,
         { studentId: dto.studentId, status: Status.ACTIVE },
         { status: Status.INACTIVE }
       );
 
+      if (!busId) {
+        return null;
+      }
+
+      const bus = await manager.findOne(Bus, { where: { id: busId } });
+      if (!bus) throw AppError.notFound('Bus not found');
+      if (bus.collegeId !== student.collegeId) {
+        throw AppError.forbidden('Cannot assign bus from another college to this student');
+      }
+
       const assignment = manager.create(StudentBusAssignment, {
         studentId: dto.studentId,
-        busId: dto.busId,
+        busId: busId,
         collegeId: dto.collegeId,
         status: Status.ACTIVE,
       });
@@ -221,10 +234,12 @@ export class StudentService {
     });
   }
 
-  async assignStopToStudent(dto: AssignStudentStopDTO, tenantCollegeId?: string): Promise<StudentStopAssignment> {
+  async assignStopToStudent(dto: AssignStudentStopDTO, tenantCollegeId?: string): Promise<StudentStopAssignment | null> {
     if (tenantCollegeId && dto.collegeId !== tenantCollegeId) {
       throw AppError.forbidden('Cannot assign stop outside your authorized college scope');
     }
+
+    const stopId = normalizeUuid(dto.stopId);
 
     return await AppDataSource.transaction(async (manager) => {
       const student = await manager.findOne(Student, { where: { id: dto.studentId } });
@@ -233,21 +248,25 @@ export class StudentService {
         throw AppError.forbidden('Cannot assign stop to student outside your authorized college scope');
       }
 
-      const stop = await manager.findOne(RouteStop, { where: { id: dto.stopId }, relations: ['route'] });
-      if (!stop) throw AppError.notFound('Route stop not found');
-      if (stop.route && stop.route.collegeId !== student.collegeId) {
-        throw AppError.forbidden('Cannot assign route stop from another college to this student');
-      }
-
       await manager.update(
         StudentStopAssignment,
         { studentId: dto.studentId, status: Status.ACTIVE },
         { status: Status.INACTIVE }
       );
 
+      if (!stopId) {
+        return null;
+      }
+
+      const stop = await manager.findOne(RouteStop, { where: { id: stopId }, relations: ['route'] });
+      if (!stop) throw AppError.notFound('Route stop not found');
+      if (stop.route && stop.route.collegeId !== student.collegeId) {
+        throw AppError.forbidden('Cannot assign route stop from another college to this student');
+      }
+
       const assignment = manager.create(StudentStopAssignment, {
         studentId: dto.studentId,
-        stopId: dto.stopId,
+        stopId: stopId,
         collegeId: dto.collegeId,
         assignmentType: dto.assignmentType || AssignmentType.BOTH,
         status: Status.ACTIVE,

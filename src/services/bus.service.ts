@@ -216,10 +216,12 @@ export class BusService {
     }) as Bus;
   }
 
-  async assignRouteToBus(dto: AssignBusRouteDTO, tenantCollegeId?: string): Promise<BusRouteAssignment> {
+  async assignRouteToBus(dto: AssignBusRouteDTO, tenantCollegeId?: string): Promise<BusRouteAssignment | null> {
     if (tenantCollegeId && dto.collegeId !== tenantCollegeId) {
       throw AppError.forbidden('Cannot assign route outside your authorized college scope');
     }
+
+    const routeId = normalizeUuid(dto.routeId);
 
     return await AppDataSource.transaction(async (manager) => {
       const bus = await manager.findOne(Bus, { where: { id: dto.busId } });
@@ -228,21 +230,25 @@ export class BusService {
         throw AppError.forbidden('Cannot assign route to bus outside your authorized college scope');
       }
 
-      const route = await manager.findOne(Route, { where: { id: dto.routeId } });
-      if (!route) throw AppError.notFound('Route not found');
-      if (route.collegeId !== bus.collegeId) {
-        throw AppError.forbidden('Cannot assign route from another college to this bus');
-      }
-
       await manager.update(
         BusRouteAssignment,
         { busId: dto.busId, status: Status.ACTIVE },
         { status: Status.INACTIVE }
       );
 
+      if (!routeId) {
+        return null;
+      }
+
+      const route = await manager.findOne(Route, { where: { id: routeId } });
+      if (!route) throw AppError.notFound('Route not found');
+      if (route.collegeId !== bus.collegeId) {
+        throw AppError.forbidden('Cannot assign route from another college to this bus');
+      }
+
       const assignment = manager.create(BusRouteAssignment, {
         busId: dto.busId,
-        routeId: dto.routeId,
+        routeId: routeId,
         collegeId: dto.collegeId,
         tripType: dto.tripType || TripType.MORNING,
         status: Status.ACTIVE,
