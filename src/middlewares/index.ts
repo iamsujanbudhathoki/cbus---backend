@@ -9,11 +9,32 @@ import swaggerDocument from '../../public/swagger.json';
 import compression from 'compression';
 import { rateLimit } from 'express-rate-limit';
 export const configMiddleware = (app: express.Application) => {
-  const corsOptions = {
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5000',
+    'https://cbus-xi.vercel.app',
+    DotenvConfig.FRONTEND_BASE_URL,
+  ].filter((url, index, self) => Boolean(url) && self.indexOf(url) === index);
+
+  const corsOptions: cors.CorsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      callback(null, true);
+      // Allow requests with no origin (like mobile apps, curl, or Postman)
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        process.env.NODE_ENV !== 'production'
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(null, true);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   };
 
   app.use(cookieParser());
