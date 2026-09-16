@@ -30,6 +30,13 @@ export interface AssignBusRouteDTO {
   tripType?: TripType;
 }
 
+function normalizeUuid(id?: string | null): string | null {
+  if (!id || id === 'none' || id === 'unassigned' || id.trim() === '' || id === 'null' || id === 'undefined') {
+    return null;
+  }
+  return id.trim();
+}
+
 @singleton()
 export class BusService {
   constructor(private firebaseService: FirebaseService) {}
@@ -97,14 +104,15 @@ export class BusService {
       throw AppError.conflict('Bus number already exists in this college');
     }
 
-    if (dto.driverId) {
-      const driver = await Driver.findOne({ where: { id: dto.driverId } });
+    const driverId = normalizeUuid(dto.driverId);
+    if (driverId) {
+      const driver = await Driver.findOne({ where: { id: driverId } });
       if (!driver) throw AppError.notFound('Driver not found');
       if (driver.collegeId !== dto.collegeId) {
         throw AppError.forbidden('Cannot assign driver from another college to this bus');
       }
       const busyBus = await Bus.findOne({
-        where: { driverId: dto.driverId, isActive: true },
+        where: { driverId, isActive: true },
       });
       if (busyBus) {
         throw AppError.conflict('This driver is already assigned to another active bus.');
@@ -116,7 +124,7 @@ export class BusService {
     bus.busNumber = dto.busNumber;
     bus.vehicleNumber = dto.vehicleNumber;
     bus.capacity = dto.capacity || 40;
-    bus.driverId = dto.driverId || undefined;
+    bus.driverId = driverId || undefined;
     bus.status = BusStatus.IDLE;
     bus.isActive = true;
 
@@ -133,24 +141,27 @@ export class BusService {
       throw AppError.forbidden('Cannot modify bus outside your authorized college scope');
     }
 
-    if (dto.driverId && dto.driverId !== bus.driverId) {
-      const driver = await Driver.findOne({ where: { id: dto.driverId } });
-      if (!driver) throw AppError.notFound('Driver not found');
-      if (driver.collegeId !== bus.collegeId) {
-        throw AppError.forbidden('Cannot assign driver from another college to this bus');
+    if (dto.driverId !== undefined) {
+      const driverId = normalizeUuid(dto.driverId);
+      if (driverId && driverId !== bus.driverId) {
+        const driver = await Driver.findOne({ where: { id: driverId } });
+        if (!driver) throw AppError.notFound('Driver not found');
+        if (driver.collegeId !== bus.collegeId) {
+          throw AppError.forbidden('Cannot assign driver from another college to this bus');
+        }
+        const busyBus = await Bus.findOne({
+          where: { driverId, isActive: true },
+        });
+        if (busyBus && busyBus.id !== bus.id) {
+          throw AppError.conflict('This driver is already assigned to another active bus.');
+        }
       }
-      const busyBus = await Bus.findOne({
-        where: { driverId: dto.driverId, isActive: true },
-      });
-      if (busyBus && busyBus.id !== bus.id) {
-        throw AppError.conflict('This driver is already assigned to another active bus.');
-      }
+      bus.driverId = driverId || (null as any);
     }
 
     if (dto.busNumber !== undefined) bus.busNumber = dto.busNumber;
     if (dto.vehicleNumber !== undefined) bus.vehicleNumber = dto.vehicleNumber;
     if (dto.capacity !== undefined) bus.capacity = dto.capacity;
-    if (dto.driverId !== undefined) bus.driverId = dto.driverId || undefined;
     if (dto.status !== undefined) bus.status = dto.status;
     if (dto.isActive !== undefined) bus.isActive = dto.isActive;
 
@@ -181,21 +192,22 @@ export class BusService {
       throw AppError.forbidden('Cannot assign driver to bus outside your authorized college scope');
     }
 
-    if (driverId) {
-      const driver = await Driver.findOne({ where: { id: driverId } });
+    const normalizedDriverId = normalizeUuid(driverId);
+    if (normalizedDriverId) {
+      const driver = await Driver.findOne({ where: { id: normalizedDriverId } });
       if (!driver) throw AppError.notFound('Driver not found');
       if (driver.collegeId !== bus.collegeId) {
         throw AppError.forbidden('Cannot assign driver from another college to this bus');
       }
       const busyBus = await Bus.findOne({
-        where: { driverId, isActive: true },
+        where: { driverId: normalizedDriverId, isActive: true },
       });
       if (busyBus && busyBus.id !== bus.id) {
         throw AppError.conflict('This driver is already assigned to another active bus.');
       }
     }
 
-    bus.driverId = driverId || undefined;
+    bus.driverId = normalizedDriverId || (null as any);
     const savedBus = await bus.save();
 
     return await Bus.findOne({
