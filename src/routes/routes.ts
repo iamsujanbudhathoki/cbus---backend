@@ -191,7 +191,8 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "parentId": {"dataType":"string","required":true},
-            "studentId": {"dataType":"string","required":true},
+            "studentId": {"dataType":"string"},
+            "studentIds": {"dataType":"array","array":{"dataType":"string"}},
             "relationship": {"dataType":"string"},
         },
         "additionalProperties": false,

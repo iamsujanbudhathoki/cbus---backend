@@ -75,7 +75,20 @@ export class FirebaseService {
       try {
         await this.db.ref(`buses/${busId}`).set(locationState);
       } catch (err) {
-        console.error(`[FirebaseService] Error updating Firebase for bus ${busId}:`, err);
+        console.error(`[FirebaseService] Error updating Firebase via admin SDK for bus ${busId}:`, err);
+      }
+    }
+
+    const databaseURL = process.env.FIREBASE_DATABASE_URL;
+    if (databaseURL) {
+      try {
+        await fetch(`${databaseURL}/buses/${busId}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(locationState),
+        });
+      } catch (restErr) {
+        // Silent REST catch
       }
     }
 

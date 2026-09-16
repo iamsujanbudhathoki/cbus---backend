@@ -387,13 +387,18 @@
 					"studentId": {
 						"type": "string"
 					},
+					"studentIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
 					"relationship": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"parentId",
-					"studentId"
+					"parentId"
 				],
 				"type": "object",
 				"additionalProperties": false

@@ -28,7 +28,8 @@ export interface UpdateParentDTO {
 
 export interface LinkStudentDTO {
   parentId: string;
-  studentId: string;
+  studentId?: string;
+  studentIds?: string[];
   relationship?: string;
 }
 
@@ -130,7 +131,24 @@ export class ParentService {
       const savedParent = await manager.save(parent);
 
       if (dto.studentIds && dto.studentIds.length > 0) {
-        for (const studentId of dto.studentIds) {
+        const uniqueStudentIds = Array.from(new Set(dto.studentIds));
+
+        // Validate that no student is already linked to another parent
+        const existingLinks = await manager.find(ParentStudent, {
+          where: { studentId: In(uniqueStudentIds) },
+          relations: ['student', 'parent'],
+        });
+
+        if (existingLinks.length > 0) {
+          const conflicts = existingLinks.map(
+            (ps) => `"${ps.student?.name || 'Student'}" (already linked to ${ps.parent?.name || 'another parent'})`
+          );
+          throw AppError.conflict(
+            `Cannot link student(s): ${conflicts.join(', ')}. A student cannot be linked to more than one parent.`
+          );
+        }
+
+        for (const studentId of uniqueStudentIds) {
           const student = await manager.findOne(Student, { where: { id: studentId } });
           if (!student) throw AppError.notFound(`Student ${studentId} not found`);
           if (student.collegeId !== dto.collegeId) {
@@ -149,28 +167,77 @@ export class ParentService {
     });
   }
 
-  async linkStudent(dto: LinkStudentDTO): Promise<ParentStudent> {
-    const parent = await Parent.findOne({ where: { id: dto.parentId } });
-    if (!parent) throw AppError.notFound('Parent not found');
+  async linkStudent(dto: LinkStudentDTO): Promise<any> {
+    const parentId = dto.parentId;
+    const rawStudentIds = dto.studentIds && dto.studentIds.length > 0
+      ? dto.studentIds
+      : dto.studentId
+      ? [dto.studentId]
+      : [];
+    const targetStudentIds = Array.from(new Set(rawStudentIds));
 
-    const student = await Student.findOne({ where: { id: dto.studentId } });
-    if (!student) throw AppError.notFound('Student not found');
+    if (!parentId) throw AppError.badRequest('Parent ID is required');
 
-    if (parent.collegeId !== student.collegeId) {
-      throw AppError.forbidden('Cannot link student from a different college to this parent');
-    }
+    return await AppDataSource.transaction(async (manager) => {
+      const parent = await manager.findOne(Parent, { where: { id: parentId } });
+      if (!parent) throw AppError.notFound('Parent not found');
 
-    const existing = await ParentStudent.findOne({
-      where: { parentId: dto.parentId, studentId: dto.studentId },
+      if (targetStudentIds.length === 0) {
+        // If empty selection submitted, clear links for this parent
+        await manager.delete(ParentStudent, { parentId });
+        return [];
+      }
+
+      // 1. Verify existence of all target students
+      const students = await manager.find(Student, { where: { id: In(targetStudentIds) } });
+      if (students.length !== targetStudentIds.length) {
+        throw AppError.notFound('One or more selected students were not found');
+      }
+
+      // 2. Validate college match
+      for (const student of students) {
+        if (parent.collegeId !== student.collegeId) {
+          throw AppError.forbidden(`Student "${student.name}" belongs to a different college`);
+        }
+      }
+
+      // 3. Single-parent rule check: verify none of targetStudentIds are linked to ANOTHER parent
+      const existingLinks = await manager.find(ParentStudent, {
+        where: { studentId: In(targetStudentIds) },
+        relations: ['student', 'parent'],
+      });
+
+      const conflictingLinks = existingLinks.filter((ps) => ps.parentId !== parentId);
+
+      if (conflictingLinks.length > 0) {
+        const conflictDetails = Array.from(
+          new Set(
+            conflictingLinks.map(
+              (ps) => `"${ps.student?.name || 'Student'}" (already linked to ${ps.parent?.name || 'another parent'})`
+            )
+          )
+        );
+        throw AppError.conflict(
+          `Cannot link student(s): ${conflictDetails.join(', ')}. A student cannot be linked to more than one parent.`
+        );
+      }
+
+      // 4. Update parent-student relationships for this parent
+      await manager.delete(ParentStudent, { parentId });
+
+      const newLinks: ParentStudent[] = [];
+      for (const studentId of targetStudentIds) {
+        const link = manager.create(ParentStudent, {
+          parentId,
+          studentId,
+          relationship: dto.relationship || 'Guardian',
+        });
+        const savedLink = await manager.save(link);
+        newLinks.push(savedLink);
+      }
+
+      return newLinks;
     });
-    if (existing) return existing;
-
-    const link = new ParentStudent();
-    link.parentId = dto.parentId;
-    link.studentId = dto.studentId;
-    link.relationship = dto.relationship || 'Guardian';
-
-    return await link.save();
   }
 
   async getParentByUserId(userId: string): Promise<any | null> {
@@ -205,8 +272,30 @@ export class ParentService {
       }
 
       if (dto.studentIds !== undefined) {
+        const uniqueStudentIds = Array.from(new Set(dto.studentIds));
+
+        if (uniqueStudentIds.length > 0) {
+          const existingLinks = await manager.find(ParentStudent, {
+            where: { studentId: In(uniqueStudentIds) },
+            relations: ['student', 'parent'],
+          });
+          const conflicting = existingLinks.filter((ps) => ps.parentId !== id);
+          if (conflicting.length > 0) {
+            const conflictDetails = Array.from(
+              new Set(
+                conflicting.map(
+                  (ps) => `"${ps.student?.name || 'Student'}" (already linked to ${ps.parent?.name || 'another parent'})`
+                )
+              )
+            );
+            throw AppError.conflict(
+              `Cannot link student(s): ${conflictDetails.join(', ')}. A student cannot be linked to more than one parent.`
+            );
+          }
+        }
+
         await manager.delete(ParentStudent, { parentId: id });
-        for (const studentId of dto.studentIds) {
+        for (const studentId of uniqueStudentIds) {
           const student = await manager.findOne(Student, { where: { id: studentId } });
           if (!student) throw AppError.notFound(`Student ${studentId} not found`);
           if (student.collegeId !== parent.collegeId) {

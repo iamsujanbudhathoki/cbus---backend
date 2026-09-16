@@ -4,6 +4,8 @@ import { BusStatus, ShiftStatus, Status } from '../types/enums';
 import { AppError } from '../utils/appError.util';
 import { AppDataSource } from '../config/database.config';
 
+import { FirebaseService } from './firebase.service';
+
 export interface StartShiftDTO {
   notes?: string;
 }
@@ -14,6 +16,8 @@ export interface UpdateNotesDTO {
 
 @singleton()
 export class DriverShiftService {
+  constructor(private firebaseService: FirebaseService) {}
+
   async getDriverPortal(userId: string): Promise<any> {
     const driver = await Driver.findOne({ where: { userId } });
     if (!driver) {
@@ -48,7 +52,7 @@ export class DriverShiftService {
   }
 
   async startShift(userId: string, dto?: StartShiftDTO): Promise<DriverShift> {
-    return await AppDataSource.transaction(async (manager) => {
+    const savedShift = await AppDataSource.transaction(async (manager) => {
       const driver = await manager.findOne(Driver, { where: { userId } });
       if (!driver) throw AppError.notFound('Driver profile not found');
 
@@ -86,14 +90,28 @@ export class DriverShiftService {
         notes: dto?.notes || '',
       });
 
-      const savedShift = await manager.save(shift);
+      const result = await manager.save(shift);
 
       // Update bus status to MOVING while shift is active
       bus.status = BusStatus.MOVING;
       await manager.save(bus);
 
-      return savedShift;
+      return result;
     });
+
+    // Sync active state to Firebase Realtime Database
+    try {
+      await this.firebaseService.updateBusLocation(savedShift.busId, {
+        latitude: 27.7172,
+        longitude: 85.324,
+        speed: 30,
+        status: BusStatus.MOVING,
+      });
+    } catch (e) {
+      console.error('[DriverShiftService] Error syncing startShift to Firebase:', e);
+    }
+
+    return savedShift;
   }
 
   async updateShiftNotes(userId: string, shiftId: string, notes: string): Promise<DriverShift> {
@@ -116,7 +134,7 @@ export class DriverShiftService {
   }
 
   async endShift(userId: string, shiftId: string): Promise<DriverShift> {
-    return await AppDataSource.transaction(async (manager) => {
+    const savedShift = await AppDataSource.transaction(async (manager) => {
       const driver = await manager.findOne(Driver, { where: { userId } });
       if (!driver) throw AppError.notFound('Driver profile not found');
 
@@ -139,7 +157,7 @@ export class DriverShiftService {
       shift.durationSeconds = durationSeconds;
       shift.status = ShiftStatus.COMPLETED;
 
-      const savedShift = await manager.save(shift);
+      const result = await manager.save(shift);
 
       // Update bus status back to IDLE
       const bus = await manager.findOne(Bus, { where: { id: shift.busId } });
@@ -148,8 +166,22 @@ export class DriverShiftService {
         await manager.save(bus);
       }
 
-      return savedShift;
+      return result;
     });
+
+    // Sync ended offline state to Firebase Realtime Database
+    try {
+      await this.firebaseService.updateBusLocation(savedShift.busId, {
+        latitude: 27.7172,
+        longitude: 85.324,
+        speed: 0,
+        status: BusStatus.OFFLINE,
+      });
+    } catch (e) {
+      console.error('[DriverShiftService] Error syncing endShift to Firebase:', e);
+    }
+
+    return savedShift;
   }
 
   async getDriverHistory(userId: string, range?: string): Promise<DriverShift[]> {
