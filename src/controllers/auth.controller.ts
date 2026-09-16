@@ -49,11 +49,15 @@ export class AuthController extends Controller {
   async logout(@Request() req?: express.Request): Promise<ApiResponse> {
     if (req && req.res) {
       const isProduction = process.env.NODE_ENV === 'production' || process.env.BASE_URL?.includes('render.com');
-      req.res.clearCookie(COOKIE_NAME, {
+      const cookieOptions = {
         path: '/',
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
         secure: isProduction,
-      });
+        httpOnly: true,
+        expires: new Date(0),
+      };
+      req.res.cookie(COOKIE_NAME, '', cookieOptions);
+      req.res.clearCookie(COOKIE_NAME, cookieOptions);
     }
     return {
       success: true,
