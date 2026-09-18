@@ -89,6 +89,35 @@ export class ParentController extends Controller {
   }
 
   /**
+   * Get lightweight real-time bus locations for a parent user account.
+   *
+   * ### Intent & Business Purpose
+   * Fetches lightweight real-time tracking coordinates for the bus(es) assigned to the parent's linked child(ren). Optimized for mobile app consumption.
+   *
+   * ### Path Parameters
+   * - `userId` *(required string)*: Parent User UUID.
+   *
+   * @param userId Parent User UUID.
+   * @Response<ApiResponse>(200, "Parent realtime bus location fetched successfully.")
+   * @Response<ApiResponse>(403, "Access denied outside authorized college scope.")
+   * @Response<ApiResponse>(404, "Parent profile not found.")
+   */
+  @Get('/user/{userId}/live-location')
+  async getLiveLocationByUserId(
+    @Path() userId: string,
+    @Request() req: express.Request
+  ): Promise<ApiResponse> {
+    try {
+      const tenantCollegeId = resolveTenantCollegeId(req);
+      const data = await this.parentService.getParentLiveLocationByUserId(userId, tenantCollegeId);
+      return { success: true, message: 'Parent realtime bus location fetched successfully', data };
+    } catch (err: any) {
+      this.setStatus(err?.statusCode || 400);
+      return { success: false, message: err.message || 'Failed to fetch realtime bus location', data: null };
+    }
+  }
+
+  /**
    * Register a new parent profile.
    *
    * ### Intent & Business Purpose

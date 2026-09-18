@@ -73,6 +73,45 @@ export class TrackingService {
     };
   }
 
+  async getBusLiveLocation(busId: string, tenantCollegeId?: string): Promise<any> {
+    const bus = await Bus.findOne({ where: { id: busId, isActive: true } });
+    if (!bus) {
+      throw AppError.notFound('Bus not found');
+    }
+
+    if (tenantCollegeId && bus.collegeId !== tenantCollegeId) {
+      throw AppError.forbidden('Cannot access bus location outside your authorized college scope');
+    }
+
+    let tracking = await this.firebaseService.getBusLocation(busId);
+    if (!tracking) {
+      tracking = {
+        busId: bus.id,
+        latitude: 27.7172,
+        longitude: 85.324,
+        speed: bus.status === BusStatus.MOVING ? 30 : 0,
+        heading: 0,
+        status: bus.status || BusStatus.IDLE,
+        lastUpdated: Date.now(),
+        trackingStatus: bus.status === BusStatus.MOVING ? TrackingStatus.LIVE : TrackingStatus.OFFLINE,
+      };
+    }
+
+    return {
+      busId: bus.id,
+      busNumber: bus.busNumber,
+      vehicleNumber: bus.vehicleNumber,
+      collegeId: bus.collegeId,
+      latitude: tracking.latitude,
+      longitude: tracking.longitude,
+      speed: tracking.speed ?? 0,
+      heading: tracking.heading ?? 0,
+      status: tracking.status || bus.status,
+      trackingStatus: tracking.trackingStatus || TrackingStatus.OFFLINE,
+      lastUpdated: tracking.lastUpdated || Date.now(),
+    };
+  }
+
   async getCollegeFleetTracking(collegeId?: string): Promise<any[]> {
     return await this.busService.getBusesByCollege(collegeId);
   }

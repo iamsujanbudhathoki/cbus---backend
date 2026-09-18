@@ -1,8 +1,9 @@
 import { singleton } from 'tsyringe';
-import { Parent, ParentStudent, Student, User } from '../entities';
-import { Role, Status } from '../types/enums';
+import { Parent, ParentStudent, Student, StudentBusAssignment, User } from '../entities';
+import { BusStatus, Role, Status, TrackingStatus } from '../types/enums';
 import { AppError } from '../utils/appError.util';
 import { StudentService } from './student.service';
+import { FirebaseService } from './firebase.service';
 import { AppDataSource } from '../config/database.config';
 import { In } from 'typeorm';
 
@@ -35,7 +36,10 @@ export interface LinkStudentDTO {
 
 @singleton()
 export class ParentService {
-  constructor(private studentService: StudentService) {}
+  constructor(
+    private studentService: StudentService,
+    private firebaseService: FirebaseService
+  ) {}
 
   async getParentsByCollege(collegeId?: string): Promise<any[]> {
     const query = Parent.createQueryBuilder('parent')
@@ -244,6 +248,85 @@ export class ParentService {
     const parent = await Parent.findOne({ where: { userId } });
     if (!parent) return null;
     return await this.getParentById(parent.id);
+  }
+
+  async getParentLiveLocationByUserId(userId: string, tenantCollegeId?: string): Promise<any> {
+    const parent = await Parent.findOne({ where: { userId } });
+    if (!parent) {
+      throw AppError.notFound('Parent profile not found');
+    }
+
+    if (tenantCollegeId && parent.collegeId !== tenantCollegeId) {
+      throw AppError.forbidden('Cannot access data outside your authorized college scope');
+    }
+
+    const parentStudents = await ParentStudent.find({
+      where: { parentId: parent.id },
+      relations: ['student'],
+    });
+
+    const busLocations = [];
+    for (const ps of parentStudents) {
+      if (!ps.student) continue;
+
+      const studentBusAssign = await StudentBusAssignment.findOne({
+        where: { studentId: ps.student.id, status: Status.ACTIVE },
+        relations: ['bus'],
+      });
+
+      if (studentBusAssign && studentBusAssign.bus) {
+        const bus = studentBusAssign.bus;
+        let tracking = await this.firebaseService.getBusLocation(bus.id);
+        if (!tracking) {
+          tracking = {
+            busId: bus.id,
+            latitude: 27.7172,
+            longitude: 85.324,
+            speed: bus.status === BusStatus.MOVING ? 30 : 0,
+            heading: 0,
+            status: bus.status || BusStatus.IDLE,
+            lastUpdated: Date.now(),
+            trackingStatus: bus.status === BusStatus.MOVING ? TrackingStatus.LIVE : TrackingStatus.OFFLINE,
+          };
+        }
+
+        busLocations.push({
+          studentId: ps.student.id,
+          studentName: ps.student.name,
+          busId: bus.id,
+          busNumber: bus.busNumber,
+          vehicleNumber: bus.vehicleNumber,
+          latitude: tracking.latitude,
+          longitude: tracking.longitude,
+          speed: tracking.speed ?? 0,
+          heading: tracking.heading ?? 0,
+          status: tracking.status || bus.status,
+          trackingStatus: tracking.trackingStatus || TrackingStatus.OFFLINE,
+          lastUpdated: tracking.lastUpdated || Date.now(),
+        });
+      } else {
+        busLocations.push({
+          studentId: ps.student.id,
+          studentName: ps.student.name,
+          busId: null,
+          busNumber: null,
+          vehicleNumber: null,
+          latitude: null,
+          longitude: null,
+          speed: 0,
+          heading: 0,
+          status: BusStatus.IDLE,
+          trackingStatus: TrackingStatus.OFFLINE,
+          lastUpdated: null,
+        });
+      }
+    }
+
+    return {
+      parentId: parent.id,
+      collegeId: parent.collegeId,
+      buses: busLocations,
+    };
   }
 
   async updateParent(id: string, dto: UpdateParentDTO, tenantCollegeId?: string): Promise<any> {

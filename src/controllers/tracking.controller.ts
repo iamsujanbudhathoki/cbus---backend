@@ -75,6 +75,35 @@ export class TrackingController extends Controller {
   }
 
   /**
+   * Get lightweight real-time GPS location of a specific bus.
+   *
+   * ### Intent & Business Purpose
+   * Returns lightweight real-time coordinates and speed of a bus for mobile app polling without returning heavy route or driver objects.
+   *
+   * ### Path Parameters
+   * - `busId` *(required string)*: Bus UUID.
+   *
+   * @param busId Bus UUID.
+   * @Response<ApiResponse>(200, "Bus realtime location fetched successfully.")
+   * @Response<ApiResponse>(403, "Access denied outside authorized college scope.")
+   * @Response<ApiResponse>(404, "Bus not found.")
+   */
+  @Get('/bus/{busId}/location')
+  async getBusLiveLocation(
+    @Path() busId: string,
+    @Request() req: express.Request
+  ): Promise<ApiResponse> {
+    try {
+      const tenantCollegeId = resolveTenantCollegeId(req);
+      const data = await this.trackingService.getBusLiveLocation(busId, tenantCollegeId);
+      return { success: true, message: 'Bus realtime location fetched successfully', data };
+    } catch (err: any) {
+      this.setStatus(err?.statusCode || 404);
+      return { success: false, message: err.message || 'Bus realtime location not found', data: null };
+    }
+  }
+
+  /**
    * Get real-time tracking overview for all buses in a college fleet.
    *
    * ### Intent & Business Purpose
