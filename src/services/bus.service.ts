@@ -2,7 +2,7 @@ import { singleton } from 'tsyringe';
 import { Bus, BusRouteAssignment, Driver, Route } from '../entities';
 import { BusStatus, Status, TrackingStatus, TripType } from '../types/enums';
 import { AppError } from '../utils/appError.util';
-import { FirebaseService } from './firebase.service';
+import { RealtimeTrackingService } from './realtime-tracking.service';
 import { AppDataSource } from '../config/database.config';
 import { In } from 'typeorm';
 
@@ -39,7 +39,7 @@ function normalizeUuid(id?: string | null): string | null {
 
 @singleton()
 export class BusService {
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(private realtimeTrackingService: RealtimeTrackingService) {}
 
   async getBusesByCollege(collegeId?: string): Promise<any[]> {
     const query = Bus.createQueryBuilder('bus')
@@ -66,46 +66,18 @@ export class BusService {
       assignmentMap.set(assign.busId, assign.route);
     });
 
-    const trackingPromises = buses.map(async (bus) => {
-      let tracking = await this.firebaseService.getBusLocation(bus.id);
-      if (!tracking) {
-        if (bus.status === BusStatus.MOVING) {
-          tracking = {
-            busId: bus.id,
-            latitude: 27.7172,
-            longitude: 85.324,
-            speed: 30,
-            heading: 0,
-            status: BusStatus.MOVING,
-            lastUpdated: Date.now(),
-            trackingStatus: TrackingStatus.LIVE,
-          };
-        } else {
-          tracking = {
-            busId: bus.id,
-            latitude: 27.7172,
-            longitude: 85.324,
-            speed: 0,
-            heading: 0,
-            status: bus.status || BusStatus.IDLE,
-            lastUpdated: Date.now(),
-            trackingStatus: TrackingStatus.OFFLINE,
-          };
-        }
-      }
-      return tracking;
-    });
-
-    const trackingResults = await Promise.all(trackingPromises);
     const trackingMap = new Map<string, any>();
-    trackingResults.forEach((t) => {
-      if (t) trackingMap.set(t.busId, t);
+    buses.forEach((bus) => {
+      const tracking = this.realtimeTrackingService.getBusLocation(bus.id);
+      if (tracking) {
+        trackingMap.set(bus.id, tracking);
+      }
     });
 
     return buses.map((bus) => ({
       ...bus,
       assignedRoute: assignmentMap.get(bus.id) || null,
-      tracking: trackingMap.get(bus.id),
+      tracking: trackingMap.get(bus.id) || null,
     }));
   }
 
@@ -127,32 +99,7 @@ export class BusService {
       relations: ['route', 'route.stops'],
     });
 
-    let tracking = await this.firebaseService.getBusLocation(bus.id);
-    if (!tracking) {
-      if (bus.status === BusStatus.MOVING) {
-        tracking = {
-          busId: bus.id,
-          latitude: 27.7172,
-          longitude: 85.324,
-          speed: 30,
-          heading: 0,
-          status: BusStatus.MOVING,
-          lastUpdated: Date.now(),
-          trackingStatus: TrackingStatus.LIVE,
-        };
-      } else {
-        tracking = {
-          busId: bus.id,
-          latitude: 27.7172,
-          longitude: 85.324,
-          speed: 0,
-          heading: 0,
-          status: bus.status || BusStatus.IDLE,
-          lastUpdated: Date.now(),
-          trackingStatus: TrackingStatus.OFFLINE,
-        };
-      }
-    }
+    const tracking = this.realtimeTrackingService.getBusLocation(bus.id) || null;
 
     return {
       ...bus,

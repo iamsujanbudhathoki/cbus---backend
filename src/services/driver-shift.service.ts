@@ -4,10 +4,14 @@ import { BusStatus, ShiftStatus, Status } from '../types/enums';
 import { AppError } from '../utils/appError.util';
 import { AppDataSource } from '../config/database.config';
 
-import { FirebaseService } from './firebase.service';
+import { RealtimeTrackingService } from './realtime-tracking.service';
+import { SocketService } from './socket.service';
 
 export interface StartShiftDTO {
   notes?: string;
+  latitude?: number;
+  longitude?: number;
+  speed?: number;
 }
 
 export interface UpdateNotesDTO {
@@ -16,7 +20,10 @@ export interface UpdateNotesDTO {
 
 @singleton()
 export class DriverShiftService {
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(
+    private realtimeTrackingService: RealtimeTrackingService,
+    private socketService: SocketService
+  ) {}
 
   async getDriverPortal(userId: string): Promise<any> {
     const driver = await Driver.findOne({ where: { userId } });
@@ -99,15 +106,23 @@ export class DriverShiftService {
       return result;
     });
 
-    // Sync active state to Firebase Realtime Database in background (non-blocking)
-    this.firebaseService.updateBusLocation(savedShift.busId, {
-      latitude: 27.7172,
-      longitude: 85.324,
-      speed: 30,
-      status: BusStatus.MOVING,
-    }).catch((e) => {
-      console.error('[DriverShiftService] Error syncing startShift to Firebase:', e);
-    });
+    // If driver provided real coordinates at shift start, update and broadcast
+    if (typeof dto?.latitude === 'number' && typeof dto?.longitude === 'number') {
+      const locationState = this.realtimeTrackingService.updateBusLocation(savedShift.busId, {
+        collegeId: savedShift.collegeId,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        speed: dto.speed ?? 0,
+        status: BusStatus.MOVING,
+      });
+      this.socketService.broadcastBusLocation(savedShift.collegeId, savedShift.busId, {
+        ...locationState,
+        trackingStatus: this.realtimeTrackingService.calculateTrackingStatus(locationState.lastUpdated, locationState.status),
+      });
+    }
+
+    // Broadcast status change to MOVING
+    this.socketService.broadcastBusStatus(savedShift.collegeId, savedShift.busId, BusStatus.MOVING);
 
     return savedShift;
   }
@@ -167,15 +182,9 @@ export class DriverShiftService {
       return result;
     });
 
-    // Sync ended offline state to Firebase Realtime Database in background (non-blocking)
-    this.firebaseService.updateBusLocation(savedShift.busId, {
-      latitude: 27.7172,
-      longitude: 85.324,
-      speed: 0,
-      status: BusStatus.OFFLINE,
-    }).catch((e) => {
-      console.error('[DriverShiftService] Error syncing endShift to Firebase:', e);
-    });
+    // Sync ended offline state to Realtime Tracking Store and broadcast via WebSockets
+    this.realtimeTrackingService.setBusOffline(savedShift.busId);
+    this.socketService.broadcastBusStatus(savedShift.collegeId, savedShift.busId, BusStatus.OFFLINE);
 
     return savedShift;
   }

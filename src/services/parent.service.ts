@@ -3,7 +3,7 @@ import { Parent, ParentStudent, Student, StudentBusAssignment, User } from '../e
 import { BusStatus, Role, Status, TrackingStatus } from '../types/enums';
 import { AppError } from '../utils/appError.util';
 import { StudentService } from './student.service';
-import { FirebaseService } from './firebase.service';
+import { RealtimeTrackingService } from './realtime-tracking.service';
 import { AppDataSource } from '../config/database.config';
 import { In } from 'typeorm';
 
@@ -38,7 +38,7 @@ export interface LinkStudentDTO {
 export class ParentService {
   constructor(
     private studentService: StudentService,
-    private firebaseService: FirebaseService
+    private realtimeTrackingService: RealtimeTrackingService
   ) {}
 
   async getParentsByCollege(collegeId?: string): Promise<any[]> {
@@ -276,19 +276,7 @@ export class ParentService {
 
       if (studentBusAssign && studentBusAssign.bus) {
         const bus = studentBusAssign.bus;
-        let tracking = await this.firebaseService.getBusLocation(bus.id);
-        if (!tracking) {
-          tracking = {
-            busId: bus.id,
-            latitude: 27.7172,
-            longitude: 85.324,
-            speed: bus.status === BusStatus.MOVING ? 30 : 0,
-            heading: 0,
-            status: bus.status || BusStatus.IDLE,
-            lastUpdated: Date.now(),
-            trackingStatus: bus.status === BusStatus.MOVING ? TrackingStatus.LIVE : TrackingStatus.OFFLINE,
-          };
-        }
+        const tracking = this.realtimeTrackingService.getBusLocation(bus.id);
 
         busLocations.push({
           studentId: ps.student.id,
@@ -296,13 +284,13 @@ export class ParentService {
           busId: bus.id,
           busNumber: bus.busNumber,
           vehicleNumber: bus.vehicleNumber,
-          latitude: tracking.latitude,
-          longitude: tracking.longitude,
-          speed: tracking.speed ?? 0,
-          heading: tracking.heading ?? 0,
-          status: tracking.status || bus.status,
-          trackingStatus: tracking.trackingStatus || TrackingStatus.OFFLINE,
-          lastUpdated: tracking.lastUpdated || Date.now(),
+          latitude: tracking?.latitude ?? null,
+          longitude: tracking?.longitude ?? null,
+          speed: tracking?.speed ?? 0,
+          heading: tracking?.heading ?? 0,
+          status: tracking?.status || bus.status,
+          trackingStatus: tracking?.trackingStatus || (bus.status === BusStatus.MOVING ? TrackingStatus.LIVE : TrackingStatus.OFFLINE),
+          lastUpdated: tracking?.lastUpdated || null,
         });
       } else {
         busLocations.push({

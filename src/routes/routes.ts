@@ -240,6 +240,9 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "notes": {"dataType":"string"},
+            "latitude": {"dataType":"double"},
+            "longitude": {"dataType":"double"},
+            "speed": {"dataType":"double"},
         },
         "additionalProperties": false,
     },

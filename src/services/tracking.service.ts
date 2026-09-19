@@ -1,7 +1,8 @@
 import { singleton } from 'tsyringe';
 import { Bus } from '../entities';
 import { BusStatus, TrackingStatus } from '../types/enums';
-import { FirebaseService, TrackingResponse } from './firebase.service';
+import { RealtimeTrackingService, TrackingResponse } from './realtime-tracking.service';
+import { SocketService } from './socket.service';
 import { BusService } from './bus.service';
 import { AppError } from '../utils/appError.util';
 
@@ -17,7 +18,8 @@ export interface LocationUpdateDTO {
 @singleton()
 export class TrackingService {
   constructor(
-    private firebaseService: FirebaseService,
+    private realtimeTrackingService: RealtimeTrackingService,
+    private socketService: SocketService,
     private busService: BusService
   ) {}
 
@@ -35,8 +37,9 @@ export class TrackingService {
       await bus.save();
     }
 
-    // Sync state to Firebase Realtime Database
-    const locationState = await this.firebaseService.updateBusLocation(dto.busId, {
+    // Update live state in realtime tracking store
+    const locationState = this.realtimeTrackingService.updateBusLocation(dto.busId, {
+      collegeId: bus.collegeId,
       latitude: dto.latitude,
       longitude: dto.longitude,
       speed: dto.speed,
@@ -44,32 +47,31 @@ export class TrackingService {
       status: currentStatus,
     });
 
-    const trackingStatus = (await this.firebaseService.getBusLocation(dto.busId))?.trackingStatus || TrackingStatus.LIVE;
+    const trackingStatus = this.realtimeTrackingService.calculateTrackingStatus(
+      locationState.lastUpdated,
+      locationState.status
+    );
 
-    return {
+    const trackingResponse: TrackingResponse = {
       ...locationState,
       trackingStatus,
     };
+
+    // Broadcast over WebSockets to both college and bus rooms
+    this.socketService.broadcastBusLocation(bus.collegeId, dto.busId, trackingResponse);
+
+    return trackingResponse;
   }
 
   async getBusTracking(busId: string): Promise<any> {
     const bus = await this.busService.getBusById(busId);
     if (!bus) throw AppError.notFound('Bus not found');
 
-    const tracking = await this.firebaseService.getBusLocation(busId);
+    const tracking = this.realtimeTrackingService.getBusLocation(busId);
 
     return {
       bus,
-      tracking: tracking || {
-        busId,
-        latitude: 27.7172,
-        longitude: 85.324,
-        speed: 0,
-        heading: 0,
-        status: bus.status || BusStatus.IDLE,
-        lastUpdated: Date.now(),
-        trackingStatus: TrackingStatus.OFFLINE,
-      },
+      tracking: tracking || null,
     };
   }
 
@@ -83,32 +85,20 @@ export class TrackingService {
       throw AppError.forbidden('Cannot access bus location outside your authorized college scope');
     }
 
-    let tracking = await this.firebaseService.getBusLocation(busId);
-    if (!tracking) {
-      tracking = {
-        busId: bus.id,
-        latitude: 27.7172,
-        longitude: 85.324,
-        speed: bus.status === BusStatus.MOVING ? 30 : 0,
-        heading: 0,
-        status: bus.status || BusStatus.IDLE,
-        lastUpdated: Date.now(),
-        trackingStatus: bus.status === BusStatus.MOVING ? TrackingStatus.LIVE : TrackingStatus.OFFLINE,
-      };
-    }
+    const tracking = this.realtimeTrackingService.getBusLocation(busId);
 
     return {
       busId: bus.id,
       busNumber: bus.busNumber,
       vehicleNumber: bus.vehicleNumber,
       collegeId: bus.collegeId,
-      latitude: tracking.latitude,
-      longitude: tracking.longitude,
-      speed: tracking.speed ?? 0,
-      heading: tracking.heading ?? 0,
-      status: tracking.status || bus.status,
-      trackingStatus: tracking.trackingStatus || TrackingStatus.OFFLINE,
-      lastUpdated: tracking.lastUpdated || Date.now(),
+      latitude: tracking?.latitude ?? null,
+      longitude: tracking?.longitude ?? null,
+      speed: tracking?.speed ?? 0,
+      heading: tracking?.heading ?? 0,
+      status: tracking?.status || bus.status,
+      trackingStatus: tracking?.trackingStatus || (bus.status === BusStatus.MOVING ? TrackingStatus.LIVE : TrackingStatus.OFFLINE),
+      lastUpdated: tracking?.lastUpdated || null,
     };
   }
 

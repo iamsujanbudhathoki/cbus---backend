@@ -53,14 +53,14 @@ export class DriverShiftController extends Controller {
    * Start a new driving shift & initiate live GPS tracking.
    *
    * ### Intent & Business Purpose
-   * Initiates an active bus shift for the authenticated driver. Marks the bus as active on live tracking maps and initializes Firebase Realtime DB tracking node.
+   * Initiates an active bus shift for the authenticated driver. Marks the bus as active on live tracking maps and initializes WebSocket tracking broadcasts.
    *
    * ### Target Audience & Roles
    * - **Allowed Roles:** `DRIVER`.
    *
    * ### Side Effects
    * - Inserts active shift into `driver_shifts` table with status `ONGOING` / `STARTED`.
-   * - Initializes live tracking node in Firebase Realtime Database.
+   * - Initializes live tracking broadcast over WebSockets.
    *
    * ### Edge Cases & QA Testing Focus
    * - Attempting to start a shift while another shift is currently active returns HTTP 400.
@@ -126,7 +126,7 @@ export class DriverShiftController extends Controller {
    *
    * ### Side Effects
    * - Updates shift record status to `COMPLETED` and sets `endedAt` timestamp.
-   * - Clears / updates active tracking node in Firebase Realtime DB.
+   * - Sets bus tracking state to offline and broadcasts status over WebSockets.
    *
    * @param id Shift UUID.
    * @Response<ApiResponse>(200, "Shift completed successfully.")

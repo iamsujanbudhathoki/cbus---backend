@@ -19,7 +19,7 @@ export class TrackingController extends Controller {
    * Update real-time GPS location coordinates of a bus.
    *
    * ### Intent & Business Purpose
-   * Receives real-time GPS coordinates (latitude, longitude, speed, heading) from driver mobile device or onboard IoT tracking device. Updates live tracking state in Firebase Realtime Database.
+   * Receives real-time GPS coordinates (latitude, longitude, speed, heading) from driver mobile device or onboard IoT tracking device. Updates live tracking state and broadcasts via WebSockets.
    *
    * ### Target Audience & Roles
    * - **Allowed Roles:** `DRIVER`.
@@ -32,7 +32,7 @@ export class TrackingController extends Controller {
    * - `heading` *(optional number)*: Heading angle / direction in degrees.
    *
    * ### Side Effects
-   * - Pushes updated coordinates to Firebase Realtime Database node (`buses/{busId}`).
+   * - Broadcasts updated coordinates to WebSocket rooms (`bus:{busId}` and `college:{collegeId}`).
    *
    * @param body Real-time GPS location update payload.
    * @Response<ApiResponse>(200, "Location updated successfully.")

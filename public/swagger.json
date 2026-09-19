@@ -506,6 +506,18 @@
 				"properties": {
 					"notes": {
 						"type": "string"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"speed": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"type": "object",
@@ -787,7 +799,7 @@
 						}
 					}
 				},
-				"description": "Update real-time GPS location coordinates of a bus.\n\n### Intent & Business Purpose\nReceives real-time GPS coordinates (latitude, longitude, speed, heading) from driver mobile device or onboard IoT tracking device. Updates live tracking state in Firebase Realtime Database.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n\n### Request Body\n- `busId` *(required string)*: Bus vehicle UUID.\n- `latitude` *(required number)*: GPS latitude coordinate.\n- `longitude` *(required number)*: GPS longitude coordinate.\n- `speed` *(optional number)*: Current vehicle speed (km/h).\n- `heading` *(optional number)*: Heading angle / direction in degrees.\n\n### Side Effects\n- Pushes updated coordinates to Firebase Realtime Database node (`buses/{busId}`).",
+				"description": "Update real-time GPS location coordinates of a bus.\n\n### Intent & Business Purpose\nReceives real-time GPS coordinates (latitude, longitude, speed, heading) from driver mobile device or onboard IoT tracking device. Updates live tracking state and broadcasts via WebSockets.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n\n### Request Body\n- `busId` *(required string)*: Bus vehicle UUID.\n- `latitude` *(required number)*: GPS latitude coordinate.\n- `longitude` *(required number)*: GPS longitude coordinate.\n- `speed` *(optional number)*: Current vehicle speed (km/h).\n- `heading` *(optional number)*: Heading angle / direction in degrees.\n\n### Side Effects\n- Broadcasts updated coordinates to WebSocket rooms (`bus:{busId}` and `college:{collegeId}`).",
 				"tags": [
 					"Live Bus Tracking"
 				],
@@ -2093,7 +2105,7 @@
 						}
 					}
 				},
-				"description": "Start a new driving shift & initiate live GPS tracking.\n\n### Intent & Business Purpose\nInitiates an active bus shift for the authenticated driver. Marks the bus as active on live tracking maps and initializes Firebase Realtime DB tracking node.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n\n### Side Effects\n- Inserts active shift into `driver_shifts` table with status `ONGOING` / `STARTED`.\n- Initializes live tracking node in Firebase Realtime Database.\n\n### Edge Cases & QA Testing Focus\n- Attempting to start a shift while another shift is currently active returns HTTP 400.",
+				"description": "Start a new driving shift & initiate live GPS tracking.\n\n### Intent & Business Purpose\nInitiates an active bus shift for the authenticated driver. Marks the bus as active on live tracking maps and initializes WebSocket tracking broadcasts.\n\n### Target Audience & Roles\n- **Allowed Roles:** `DRIVER`.\n\n### Side Effects\n- Inserts active shift into `driver_shifts` table with status `ONGOING` / `STARTED`.\n- Initializes live tracking broadcast over WebSockets.\n\n### Edge Cases & QA Testing Focus\n- Attempting to start a shift while another shift is currently active returns HTTP 400.",
 				"tags": [
 					"Driver Shifts"
 				],
@@ -2187,7 +2199,7 @@
 						}
 					}
 				},
-				"description": "Complete & end an active driving shift.\n\n### Intent & Business Purpose\nEnds an active driver shift, records end timestamp, calculates total shift duration, and sets tracking status to completed.\n\n### Path Parameters\n- `id` *(required string)*: Shift UUID.\n\n### Side Effects\n- Updates shift record status to `COMPLETED` and sets `endedAt` timestamp.\n- Clears / updates active tracking node in Firebase Realtime DB.",
+				"description": "Complete & end an active driving shift.\n\n### Intent & Business Purpose\nEnds an active driver shift, records end timestamp, calculates total shift duration, and sets tracking status to completed.\n\n### Path Parameters\n- `id` *(required string)*: Shift UUID.\n\n### Side Effects\n- Updates shift record status to `COMPLETED` and sets `endedAt` timestamp.\n- Sets bus tracking state to offline and broadcasts status over WebSockets.",
 				"tags": [
 					"Driver Shifts"
 				],
